@@ -25,7 +25,7 @@ Build preflight must check all four output targets for source-path, realpath and
 - No OCR, cloud lookup, frame upload, persistent diagnostic history, new progress persistence or client-progress synchronization.
 - Do not modify installed applications, global workstation/credential settings, protected originals or the reference checkout. Do not move/delete private files or perform unrelated cleanup.
 
-The enhancer does not execute selected input during extraction, but generated HTML retains the executable vendor viewer. Only trusted exports are suitable. Project MIT licensing does not grant viewer, board or model rights; public vendor-viewer redistribution has not been established. Do not publish generated viewer HTML.
+The enhancer does not execute selected input during extraction, but generated HTML retains the executable vendor viewer. Only trusted exports are suitable. Project Apache-2.0 licensing does not grant viewer, board or model rights; public vendor-viewer redistribution has not been established. Do not publish generated viewer HTML.
 
 ## 0.2.0 diagnostics and repeat-state authorization
 
@@ -37,10 +37,10 @@ Core/UI integration, rebuilding and affected software checks have now been recon
 
 ## Publication and repository authorization
 
-The user requested **MIT licensing for original project code/docs**, a professional de-identified documentation set and **bilingual README files with English as the default**, linked reciprocally. Retain upstream attribution, copyright, license and modification notices; include the project's MIT notice in generated notices without relicensing third-party/vendor material.
+The user requested **Apache-2.0 licensing for original project code/docs**, superseding the earlier project-license choice, while retaining professional de-identified documentation and **bilingual README files with English as the default**, linked reciprocally. Retain upstream attribution, copyright, license and modification notices. Generated assets must embed the full root Apache-2.0 LICENSE and project NOTICE alongside complete applicable upstream notices, without relicensing third-party/vendor material. The license-change rebuild and notice verification are separate from the recorded 0.2.0 software results.
 
 Remove absolute machine/install/user paths, personal information, private board/sample filenames, specimen fingerprints, board-content identifiers and internal operational transcripts from public Markdown. Use generic repository-relative examples such as `input/board.html`. Documentation redaction does not erase older Git history; history rewriting requires separate explicit authorization.
 
-Authorized publication is a **non-forced push of validated source commits and milestone tags** to <https://github.com/JOEYZYC/BagBom4EasyEDA>. Review staged scope and applicable evidence first; verify ambiguous remote outcomes before retrying. Do not overwrite remote history or change credentials/global configuration.
+The latest authorization is to **commit and non-force push the reviewed license change** to <https://github.com/JOEYZYC/BagBom4EasyEDA> after applicable validation. Preserve existing tags/history: `v0.2.0` remains its historical MIT snapshot; current `main` is authoritative for the new project license. No new version or tag is assumed. GitHub Release publication is paused; do not attach Apache-labeled assets to the historical MIT tag. Review staged scope and evidence first, verify ambiguous remote outcomes before retrying, and do not overwrite remote history or change credentials/global configuration.
 
-Keep `input/`, `output/`, `references/`, `node_modules/`, `tests/.generated/` and `.env` untracked. Exclusion from Git does not authorize deletion. Do not publish raw/derived viewer HTML, board/model data, images or runtime diagnostic payloads. See [repository hygiene](version-control.md), [LICENSE](../LICENSE) and [third-party notices](../THIRD_PARTY_NOTICES.md).
+Keep `input/`, `output/`, `references/`, `node_modules/`, `tests/.generated/` and `.env` untracked. Exclusion from Git does not authorize deletion. Do not publish raw/derived viewer HTML, board/model data, images or runtime diagnostic payloads. See [repository hygiene](version-control.md), [Apache-2.0 license](../LICENSE), [project NOTICE](../NOTICE) and [third-party notices](../THIRD_PARTY_NOTICES.md).

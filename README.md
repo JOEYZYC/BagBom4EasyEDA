@@ -68,8 +68,10 @@ Full integration tests require separately prepared, untracked compatible native 
 
 ## License and attribution
 
-Original project code and documentation are **MIT licensed**; see [LICENSE](LICENSE). This does not relicense third-party or vendor material.
+Original project code and documentation on current `main` are licensed under **Apache-2.0**; see [LICENSE](LICENSE) and [NOTICE](NOTICE). This does not relicense third-party or vendor material.
 
 The project draws on [egethropic/bag-bom](https://github.com/egethropic/bag-bom) (Apache-2.0); applicable copyright and modification notices for the adapted decoder worker are retained. Decoder dependencies include zxing-wasm (MIT), ZXing-C++ (Apache-2.0), stb (MIT/public domain) and Emscripten (MIT/NCSA). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-MIT does **not** grant rights to the vendor viewer, board data or models. Public redistribution of the vendor viewer has not been established; do not publish generated viewer HTML.
+The project's Apache-2.0 license does **not** grant rights to the vendor viewer, board data or models. Public redistribution of the vendor viewer has not been established; do not publish generated viewer HTML.
+
+The historical `v0.2.0` tag retains its original **MIT** license snapshot; existing tags and history are not rewritten. Current `main` is authoritative for the license change. The Apache-2.0 build and embedded notices were verified separately; see [verification](docs/verification.md). No new version/tag or GitHub Release is announced here.

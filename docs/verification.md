@@ -6,6 +6,8 @@
 
 The earlier v0.1.0 baseline had 32 unit/contract tests, 9 generated-viewer checks and 4 lifecycle refinements, and its source/tag was pushed without force. The current results below were established for 0.2.0 rather than inferred from that baseline. See [development requirements](implementation-plan.md) and [scan diagnostics](scan-diagnostics.md).
 
+The historical `v0.2.0` tag retains its MIT license snapshot. Current `main` adopts Apache-2.0 for original project code/docs without rewriting that tag or history. The recorded software results below predate license-change validation; they are not a fresh pass for the Apache-2.0 build or generated notices. No new version/tag or published GitHub Release is established by this record.
+
 ## Configuration and evidence types
 
 - Recorded runtime: **Node 24.22.2**, **pnpm 11.18.0**; dependencies fixed by the project lockfile.
@@ -22,7 +24,7 @@ Source inspection, deterministic tests, generated-viewer execution and synthetic
 | Type checking | `pnpm typecheck` completed successfully. |
 | Unit/contract tests | **48/48 passed**, including **14 camera lifecycle/scheduling tests** and **16 repeat-state/text tests**. Exact identity/conflict handling, stale sessions, row adaptation, source preservation and all four output-target alias checks remain covered. |
 | Focused UI checks | `pnpm test:ui` passed for scanner/enhancer actions, nine diagnostic states, literal hostile text, selection/scroll stability, copy success and unavailable/denied fallback, responsive bounds and cleanup. This evidence remains valid through the final controller-only fix because UI/contracts did not change. |
-| Local build | The reusable enhancer and enhanced viewer were rebuilt; original input preservation was checked. Generated notices contain the full project MIT license and applicable upstream license/NOTICE text. |
+| Local build | The recorded 0.2.0 enhancer and enhanced viewer were rebuilt; original input preservation was checked. That historical build embedded the then-current project MIT license and applicable upstream license/NOTICE text. This does not verify an Apache-2.0 license-change build. |
 | Derived-viewer browser checks | **13 checks passed** on the generated viewer in isolated browser automation with network blocking and no page errors. |
 | Lifecycle refinements | **4 checks passed**, covering active-media state, Stop cleanup and cancellation of a pending original selection callback. |
 | Synthetic-media integration | Synthetic video frames passed through the **actual inline Worker/WASM decoder to the original viewer**. A separate media check confirmed distinct frames, one job in flight and cleanup, with zero physical-camera calls. No successful decode or native receipt was fabricated. |
@@ -60,7 +62,17 @@ Prior synthetic benchmarking retained complete expected results for **40/40** me
 - Actual bottom-side viewer behavior; synthetic contracts do not establish real bottom-side operation.
 - New export versions, blanket V4 compatibility, other browser/layout families and all real-world label/format combinations.
 - Soldering-progress save/reopen behavior and client synchronization. No new persistence is promised.
-- Public redistribution permission for vendor viewer code, board data and models. The project's MIT license does not grant these rights.
+- Public redistribution permission for vendor viewer code, board data and models. The project's Apache-2.0 license does not grant these rights.
+
+## VERIFIED — Apache-2.0 packaging
+
+The root [Apache-2.0 LICENSE](../LICENSE) was checked against the standard text, and a project [NOTICE](../NOTICE) was added. Package metadata and the build's project-license heading now use Apache-2.0. Third-party MIT/NCSA/public-domain terms remain unchanged.
+
+**VERIFIED — fresh build/runtime checks after the license change:** build-script syntax, `pnpm build` and all **13 generated-viewer browser checks** passed. A focused isolated-browser check inspected both rebuilt files' actual notice disclosures and found all **eight complete project/upstream license or NOTICE texts** in each, with no old project-MIT heading, page errors, external requests or physical-camera calls. Source preservation remained intact.
+
+Only license metadata, notice packaging and documentation changed; unchanged type/unit/UI/camera/refinement evidence above was reused. This packaging verification is separate from the historical MIT-tag build and does not establish new physical-camera performance.
+
+GitHub Release creation has not been completed and is paused for this change. Do not attach Apache-labeled assets to the historical MIT `v0.2.0` tag. The authorized license-change commit/non-forced push is not recorded here as completed; no new version/tag is assumed.
 
 ## Reproducing checks
 

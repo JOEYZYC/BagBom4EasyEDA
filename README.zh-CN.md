@@ -68,8 +68,10 @@ pnpm exec node scripts/browser-check.mjs --refinement
 
 ## 许可与致谢
 
-本项目原创代码及文档采用 **MIT 许可**，见 [LICENSE](LICENSE)。该许可不会重新授权第三方或原厂材料。
+当前 `main` 上的本项目原创代码及文档采用 **Apache-2.0 许可**，见 [LICENSE](LICENSE) 与 [NOTICE](NOTICE)。该许可不会重新授权第三方或原厂材料。
 
 项目参考 [egethropic/bag-bom](https://github.com/egethropic/bag-bom)（Apache-2.0），保留所适用的版权声明及改编解码 Worker 的修改通知。解码依赖包括 zxing-wasm（MIT）、ZXing-C++（Apache-2.0）、stb（MIT/公有领域）和 Emscripten（MIT/NCSA）。详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-MIT **不授予**原厂查看器、板图数据或模型的权利。尚未建立原厂查看器的公开再分发授权，请勿公开发布生成的查看器 HTML。
+本项目的 Apache-2.0 许可**不授予**原厂查看器、板图数据或模型的权利。尚未建立原厂查看器的公开再分发授权，请勿公开发布生成的查看器 HTML。
+
+历史 `v0.2.0` 标签保留其原始 **MIT** 许可快照，不改写现有标签或历史。本次许可变更以当前 `main` 为准。Apache-2.0 构建及内嵌通知已另行验证，参见[验证记录](docs/verification.md)。此处不宣布新版本、标签或 GitHub Release。

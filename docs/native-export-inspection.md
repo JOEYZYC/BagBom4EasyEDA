@@ -40,7 +40,7 @@ Reject mixed/conflicting/missing identities, hidden or incomplete targets and un
 - **UNVERIFIED outside separately recorded runtime evidence:** execution of the full original-viewer selection path, different export versions and physical-camera behavior. Static source intent is not a runtime pass.
 - **UNVERIFIED:** client progress synchronization and cross-session soldering-progress behavior. No new persistence guarantee is introduced.
 - **VERIFIED — source packaging inspection (H1, H4):** native exports contain executable viewer/model material; the decoder reference uses Worker/WASM. Packaging alone does not prove offline execution or camera permission.
-- **UNVERIFIED:** public redistribution rights for the vendor viewer. Original project MIT licensing and upstream notices do not grant those rights.
+- **UNVERIFIED:** public redistribution rights for the vendor viewer. Original project Apache-2.0 licensing and upstream notices do not grant those rights.
 
 Only enhance trusted exports. Data-only extraction does not make the resulting executable viewer safe to open if its source is untrusted. See [usage](usage.md), [reference terms](reference-status.md) and [research boundaries](native-tool-research.md).
 

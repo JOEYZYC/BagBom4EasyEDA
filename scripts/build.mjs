@@ -12,7 +12,8 @@ const bytes = await readFile(source);
 if (!process.argv[2] && (hash(bytes) !== knownHash || bytes.length !== 9189105)) throw new Error('Specimen identity changed; refusing build');
 const reference = 'references/bag-bom/';
 const licensePaths = ['LICENSE','NOTICE','third_party/ZXING-CPP-LICENSE.txt','third_party/STB-LICENSE.txt','third_party/EMSCRIPTEN-LICENSE.txt'];
-const notices = ['===== BagBom4EasyEDA MIT =====\n'+await readFile('LICENSE','utf8'),
+const notices = ['===== BagBom4EasyEDA Apache-2.0 =====\n'+await readFile('LICENSE','utf8'),
+  '===== BagBom4EasyEDA NOTICE =====\n'+await readFile('NOTICE','utf8'),
   await readFile('THIRD_PARTY_NOTICES.md','utf8'),
   ...(await Promise.all(licensePaths.map(async path => `\n===== ${path} =====\n${await readFile(reference+path,'utf8')}`))),
   '\n===== zxing-wasm 3.1.6 MIT =====\n'+await readFile('node_modules/zxing-wasm/LICENSE','utf8')].join('\n');

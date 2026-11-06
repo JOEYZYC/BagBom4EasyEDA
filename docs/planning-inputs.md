@@ -29,4 +29,4 @@ Add local barcode input to the original LCEDA / EasyEDA Pro soldering-assistance
 
 Support is limited to the supplied export family, not a blanket claim for V4 or every EasyEDA version. Prior bounded public-document research found no supported native-client viewer row-selection API; that is not proof no such API exists. See [research notes](native-tool-research.md).
 
-Original project code/docs are MIT licensed. Upstream and vendor terms remain separate; MIT does not grant board/model/viewer rights or establish public redistribution permission. Do not publish generated viewer files. See [LICENSE](../LICENSE) and [third-party notices](../THIRD_PARTY_NOTICES.md).
+Original project code/docs on current `main` are Apache-2.0 licensed. Upstream and vendor terms remain separate; the project license does not grant board/model/viewer rights or establish public redistribution permission. Do not publish generated viewer files. See [LICENSE](../LICENSE), [NOTICE](../NOTICE) and [third-party notices](../THIRD_PARTY_NOTICES.md).

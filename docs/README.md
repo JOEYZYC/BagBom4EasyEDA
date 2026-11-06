@@ -22,6 +22,8 @@
 
 - [Verification record](verification.md): actual evidence and unresolved limits, separate from requirements.
 - [Execution contract](execution-contract.md): project execution scope.
-- [MIT license](../LICENSE) and [third-party notices](../THIRD_PARTY_NOTICES.md): original project terms do not grant vendor-viewer, board or model rights.
+- [Apache-2.0 license](../LICENSE), [project NOTICE](../NOTICE) and [third-party notices](../THIRD_PARTY_NOTICES.md): original project terms do not grant vendor-viewer, board or model rights.
 
 0.2.0 has passed local software verification, not physical-camera validation. Generated HTML and private native exports are not supplied by the source repository.
+
+Current `main` uses Apache-2.0 for original project code/docs; `v0.2.0` remains its historical MIT snapshot. License-change build/notice verification is separate from the recorded software results. GitHub Release publication is paused; no new version/tag is assumed.

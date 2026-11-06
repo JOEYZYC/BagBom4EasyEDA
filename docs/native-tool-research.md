@@ -58,6 +58,6 @@ Unversioned documentation and unpinned examples can change. No supported client 
 
 Enhance trusted native exports without executing them during extraction; generate a new file retaining the vendor viewer and reuse its original single-click only after exact complete-row matching. Do not guess private RPCs or rebuild the renderer. See [design](implementation-plan.md), [static export notes](native-export-inspection.md) and [usage](usage.md).
 
-The original viewer, board and model rights remain separate from the project's MIT license. Public vendor-viewer redistribution permission has not been established; do not publish generated HTML. Runtime and release evidence belongs in [verification.md](verification.md).
+The original viewer, board and model rights remain separate from the project's Apache-2.0 license. Public vendor-viewer redistribution permission has not been established; do not publish generated HTML. Runtime and release evidence belongs in [verification.md](verification.md).
 
 **Confidence:** high for the documented export capability and the distinction between editor APIs and the original viewer; limited to the searched sources for the negative API finding. Runtime and rights conclusions remain unverified unless separately evidenced.
