@@ -1,40 +1,75 @@
 # BagBom4EasyEDA
 
-立创原生 BOM HTML 扫码增强。项目仓库：<https://github.com/JOEYZYC/BagBom4EasyEDA>。
+**English** | [简体中文](README.zh-CN.md)
 
-保留原生焊接辅助查看器，只把完整料号输入转换为原来的 BOM 单击选择。**使用成品不需要安装 Node.js、启动服务或联网。**
+Local barcode scanning for the original **LCEDA / EasyEDA Pro soldering-assistance BOM HTML export**. Keep the original BOM, 3D/2D viewer and manual soldering workflow; use an exact decoded part identity to trigger the original BOM-row single-click.
 
-## 直接使用
+This is an independent browser enhancement—not a client extension, official API integration or rebuilt iBOM. Repository: <https://github.com/JOEYZYC/BagBom4EasyEDA>.
 
-- 已为本次原件生成：[`output/InteractiveBOM_PCB_Back_2026-11-6_扫码版.html`](output/InteractiveBOM_PCB_Back_2026-11-6_扫码版.html)。用现代 Chrome/Edge 打开，先输入 **C25900**，应定位 **R1、R2、R4**。
-- 处理下一份兼容的原生导出：打开 [`output/html-enhancer.html`](output/html-enhancer.html)，选择原生 HTML，下载新的“_扫码版.html”，再打开下载文件。文件读取、增强和下载都在浏览器本地进行；原件不会被程序覆写。
-- 扫码必须由你点击“开启摄像头扫码”并授权。真实相机/真实料袋尚未代你测试。
+## Status
 
-完整操作与失败处理见 [使用说明](docs/usage.md)，证据与未验证项见 [验证记录](docs/verification.md)。
+The **0.1.0 baseline** was verified and pushed without force. **0.2.0 is a development target pending final release validation**: bounded plaintext scan diagnostics, copying with a manual fallback, and same-code rearming. Baseline verification does not establish that these development features have passed. See [diagnostics](docs/scan-diagnostics.md) and the [verification record](docs/verification.md).
 
-## 安全边界
+## Use locally built files
 
-不做 OCR、云查询、参数/封装猜测、模糊匹配或自动焊接勾选。混合/缺失身份、多码冲突、隐藏目标、无法完整表达的多位号选择均拒绝。原生手动操作优先，会暂停扫码。停止/失败不假装清除旧板图高亮。
+Generated HTML and the original vendor viewer are **not included in the Git repository or a source checkout**. Prepare a compatible native export and build locally as described below, or use files you have already built locally.
 
-查看器附加网络 CSP，阻断原包的后台在线字体/API/资源请求；原厂核心不改写。仅处理你信任的原生导出：增强器不执行输入文件，但下载文件仍含输入原有的可执行查看器。
+1. In LCEDA PCB, choose **Tools → Soldering Assistance → Export → Offline HTML** (`工具 → 焊接辅助工具 → 导出 → 离线Html`).
+2. Open the locally built `output/html-enhancer.html` in desktop Chrome or Edge.
+3. Choose a **trusted, untouched native HTML export**, such as `input/board.html`—not CSV, XLSX or an already enhanced file.
+4. Download a new `*_扫码版.html` and open it. Do not overwrite the original.
+5. Use aggregated BOM mode (`位号聚合`), clear search/visibility filters, and manually verify a complete supplier C-code from your own BOM before scanning.
+6. Click **Start camera** and grant permission. Check the full matched reference set and the original viewer response.
 
-原厂查看器公开再分发许可未确认。含 PCB/模型的扫码版只供用户本机使用，不要公开上传。[第三方通知](THIRD_PARTY_NOTICES.md)及完整许可已内嵌到成品中。
+Using built files needs **no Node.js, server or CDN**. Camera access from a local file depends on the browser runtime and permission; do not bypass browser security. **Stop** releases the camera; folding the panel does not stop it. Native manual interaction pauses scanning. For a new build, close old tabs and reopen the new file; regenerate other boards from their untouched originals with the new enhancer.
 
-## 开发者复现（普通用户不需要）
+More: [usage](docs/usage.md) · [documentation index](docs/README.md).
 
-Git 仅管理本项目源码、测试、依赖锁和文档。`input/` 原始板图、`output/` 生成文件、`node_modules/`、`tests/.generated/` 及 `references/` 独立参考检出均不入库，不公开上传原厂查看器或 PCB 数据。新机器需另行准备可信原生导出及 [固定版本参考源码](docs/reference-status.md)，仅克隆主仓库不包含这些本地材料。
+## Exact matching and safety
 
-依赖固定于 `package.json` / `pnpm-lock.yaml`；Node 24、pnpm 11.18.0。此工作站每次在同一个非交互进程激活指定 Profile：
+- Match a complete supplier C-code or verified complete MPN to the complete original row/reference set. No fuzzy matching, value/package guesses, OCR, cloud lookup or automatic soldered-state marking.
+- Reject mixed, conflicting, incomplete or missing identities, hidden targets and unsupported multi-row selections rather than select a subset. A previous highlight may remain after rejection; it is not a new success.
+- Preserve the original single-click behavior, including any original centering or side flip. Do not promise client integration, progress synchronization or new progress persistence.
+- The enhancer reads input as data without executing it. **The generated file still contains the executable vendor viewer: use only trusted exports.** Compatibility is limited to the supplied export family, not all V4 exports.
+- Scanning and decoding are local. The 0.2.0 diagnostics target keeps bounded plaintext in memory, not images, uploaded logs or persistent scan history. Wrinkles, reflections and occlusion can still prevent decoding.
 
-```powershell
-. D:/Dev/Station/Profiles/node-24.ps1; pnpm install --frozen-lockfile
-. D:/Dev/Station/Profiles/node-24.ps1; pnpm typecheck
-. D:/Dev/Station/Profiles/node-24.ps1; pnpm test
-. D:/Dev/Station/Profiles/node-24.ps1; pnpm test:ui
-. D:/Dev/Station/Profiles/node-24.ps1; pnpm build
-. D:/Dev/Station/Profiles/node-24.ps1; pnpm test:browser
+## Development
+
+Package: `bagbom4easyeda`. Use **Node 24** and **pnpm 11.18.0**.
+
+The source build requires a read-only reference checkout at `references/bag-bom`, pinned to public upstream commit `1fc1e0b2abd8b023ba01e6000c4110d72d94860c`. Optional setup commands, if that checkout is not already present:
+
+```sh
+git clone https://github.com/egethropic/bag-bom.git references/bag-bom
+git -C references/bag-bom checkout --detach 1fc1e0b2abd8b023ba01e6000c4110d72d94860c
 ```
 
-默认构建只读 `input/InteractiveBOM_PCB_Back_2026-11-6.html`，先检查已记录的大小/哈希，再写入项目的 `output/`。所有工具、扫码版、通知和测试 harness 输出在任何 mkdir/write 前统一核对源路径、真实路径及文件身份；源文件别名冲突或身份不确定时拒绝整个写入计划。不要并发改变源文件/输出路径或符号链接。`pnpm build <另一个原生HTML路径>` 可为另一份兼容导出构建；默认的浏览器验证则明确针对本次样本。浏览器测试使用 `playwright-core` 和已安装 Chrome，不下载浏览器、不使用用户配置、不允许真实摄像头。
+Keep the reference checkout unchanged. After separately preparing a compatible export at `input/board.html`:
 
-没有新增 `.devtools.json`。父目录指示的旧 `devrun.exe` 不存在；遵循当前工作站规则，使用上述 Node Profile，不修改工作站/PATH。
+```sh
+pnpm install --frozen-lockfile
+pnpm exec node scripts/build.mjs input/board.html
+```
+
+Relevant checks (fixture prerequisites below; commands are not pass claims):
+
+```sh
+pnpm typecheck
+pnpm test
+pnpm test:ui
+pnpm test:browser
+pnpm exec node tests/scanner-media-check.mjs
+pnpm exec node scripts/browser-check.mjs --refinement
+```
+
+Full integration tests require separately prepared, untracked compatible native exports/fixture configuration, installed Chrome/Edge and isolated automation. Some scripts retain local fixture defaults; a fresh checkout is not a ready-to-run integration fixture set. Automated media checks use synthetic media, with real camera access blocked.
+
+`input/`, `output/`, `references/`, `node_modules/`, `tests/.generated/` and `.env` are ignored and not included in Git. Build preflight checks all four output targets for source-path, realpath and file-identity aliasing before writes, with a source-preservation hash check. Concurrent external path changes are outside that guarantee. See [input requirements](docs/input-samples.md) and [reference/dependency notes](docs/reference-status.md).
+
+## License and attribution
+
+Original project code and documentation are **MIT licensed**; see [LICENSE](LICENSE). This does not relicense third-party or vendor material.
+
+The project draws on [egethropic/bag-bom](https://github.com/egethropic/bag-bom) (Apache-2.0); applicable copyright and modification notices for the adapted decoder worker are retained. Decoder dependencies include zxing-wasm (MIT), ZXing-C++ (Apache-2.0), stb (MIT/public domain) and Emscripten (MIT/NCSA). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+MIT does **not** grant rights to the vendor viewer, board data or models. Public redistribution of the vendor viewer has not been established; do not publish generated viewer HTML.

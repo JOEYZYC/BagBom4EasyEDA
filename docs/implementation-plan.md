@@ -1,314 +1,48 @@
-# 摄像头扫码替代原焊接辅助工具 BOM 点击：实施计划
+# Design and release requirements
 
-日期：2026-11-06  
-状态：**扫码性能改进已重建并通过软件验收；本地 v0.1.0 源码快照准备完成，物理相机提速幅度待用户验证。**  
-工作区：`G:/_MyProject/BagBom`
+This document describes the current export-enhancement design, not a client-extension plan. See [requirements](planning-inputs.md), [usage](usage.md) and [verification](verification.md).
 
-## 1. 目标与已完成事项
+## Release status
 
-用户原话：
+- **0.1.0:** verified baseline, pushed without force.
+- **0.2.0:** development target; plaintext diagnostics and revised same-code rearming remain pending final release validation. Do not treat baseline results as validation of this work.
 
-> 原本的工具就像这样。点击BOM中的元件，可以与PCB对应。现在只要将点击这一步骤改为摄像头二维码识别。
-
-准确目标是：**保留现有焊接辅助工具，只增加摄像头输入，复用原来的 BOM 选择及板图联动。** 不重新实现 BOM、板图或 3D 渲染器。
-
-| 已完成事项 | 证据及限制 |
-| --- | --- |
-| 下载参考源码 | `references/bag-bom`，提交 `1fc1e0b2abd8b023ba01e6000c4110d72d94860c`；来源、HEAD、干净状态及许可证文件已核验，见 [reference-status.md](reference-status.md)。未安装依赖或运行源码。 |
-| 确认原工具 | 官方“焊接辅助工具”与用户截图一致；文档和截图不是当前客户端运行验证。 |
-| 确认原生 HTML 导出 | 用户提供原生文件，元数据和关键数据/处理器已复核，见 [静态检查](native-export-inspection.md)；不把源码意图当作实际选择成功。 |
-| 检索原窗口选中接口 | 公开来源中 **NOT_FOUND**；不等于证明任何内部接口都不存在。 |
-| 实现状态 | 两份 HTML 已更新，32 项测试、类型/构建/实际派生查看器与合成媒体检查通过；UI 专项复用未变源码的首版证据。原件与参考仓库未改动，未访问真实摄像头。见 [验证记录](verification.md)。 |
-
-依据：[本轮执行边界](execution-contract.md)、[需求与输入](planning-inputs.md)、[研究包](native-tool-research.md)。
-
-## 2. 路线选择：不能互相冒充
-
-| 路线 | 内容 | 当前结论 |
-| --- | --- | --- |
-| **L1：客户端原窗口适配** | 摄像头识别后，通过受支持入口选择正在使用的原焊接辅助窗口中的条目。 | 历史调查路线；用户已明确不再依赖客户端，当前不实施。 |
-| **L2：增强原生导出的 HTML** | 增加扫码输入，仍使用真实导出产物原有的 BOM、板图、选择和高亮代码。 | 用户已选定并批准实现；本地增强工具生成新副本，原件不变。 |
-| **L3：独立查看器或编辑器高亮** | fork 新 iBOM、另做板图，或只高亮普通 PCB 编辑器。 | 不属于当前需求；不得静默降级为此方案。 |
-
-用户先允许只读检查，随后明确“抛开立创EDA软件”、选择 HTML 增强副本，并批准详细方案与 bag-bom 参考实现。只读原件为 `G:/Downloads/InteractiveBOM_PCB_Back_2026-11-6.html`；允许生成项目内派生副本并进行软件验证，但不允许 Agent 启动真实摄像头或访问 `E:/EasyEDA`。完整客户端版本不再阻断针对导出产物的实现，不声称客户端兼容。
-
-**决策顺序：**
-
-1. 按 L2 实现独立浏览器本地增强工具和当前板子的增强副本，不再等待 L1 接口。
-2. 先证明手动精确 C 编号可触发真实原查看器选中，再验证扫码到选择的闭环。
-3. 若安全适配失败，不猜消息协议、不用编辑器高亮代替、不重写原核心；报告具体不支持原因。
-4. 源码、UI、打包和软件测试可并行准备；真实物理摄像头由用户在交付页主动启动并授权，不能由软件 mock 替代验收。
-
-## 3. 功能边界与等价标准
-
-### 第一轮包含
-
-- 用户手动启停摄像头、本地二维码解码。
-- LCSC/JLC 料袋产品身份解析与完整 C 编号精确匹配；只有确有需要且映射经过验证时，才纳入精确 MPN。
-- 将精确身份转换为**原工具的原有条目/器件集合**，触发原来的单击选中、高亮。
-- 显示本次身份、命中位号及失败原因；保留原来的手工点击入口。
-- 处理重复码、无匹配、冲突、目标切换、权限拒绝及关闭清理。
-
-### 必须保持
-
-- 原 BOM 分组/不分组、顶底层、3D/简图、过滤与手工操作。
-- 原理图、PCB、布局、器件属性及标识不变。
-- **扫码绝不自动勾选“已焊接/已放置”，不覆写人工焊接进度。**
-- 以原生单击行为为基线，不额外强制切层、改过滤器或缩放。
-- 单击与双击分开，不额外合成双击；原单击本身已有的居中或翻面属于基线，不能误当作新增功能去掉。
-- L2 不得声称与客户端共享进度或双向同步，除非另有证据。
-
-### 第一轮排除
-
-OCR、云端数据库、云识别、帧上传、遥测、散装器件视觉识别、所有供应商/码制全面兼容、新渲染器、自动修复 BOM、自动改器件编号、客户端文件补丁、宿主 DOM 注入、二进制逆向、猜测私有消息、固件/硬件/打印操作。
-
-`sys_Window.openUI` 明确为非公开接口，原工具的名称和参数未知，默认不作为方案基础。若未来考虑，须另行说明版本脆弱性并确认风险接受；“调用没抛错”不能证明已打开或选中目标。
-
-## 4. 已核实的依据与尚未证明的部分
-
-分类沿用研究包：VERIFIED 限具体证据类型；NOT_FOUND 限检索范围；UNVERIFIED 表示缺证据；RECOMMENDED 表示计划建议。
-
-| 判断 | 分类 | 来源与定位 |
-| --- | --- | --- |
-| 原工具支持聚合、焊接勾选、列表/板图交互；截图提示单击选中、双击定位。 | VERIFIED：文档和视觉观察 | [研究包 S1、S9 / F1](native-tool-research.md#findings)；[官方工具页](https://prodocs.lceda.cn/cn/pcb/tools-soldering-assistance-tool/)，操作入口和正文。 |
-| 可把整个 PCB 3D 预览导出为 HTML。 | VERIFIED：官方文档 | [S6 / F2](native-tool-research.md#findings)；[官方导出页](https://prodocs.lceda.cn/cn/pcb/export-interactive-bom/)，两种入口。 |
-| 受支持的原窗口行选择接口未找到。 | NOT_FOUND：限定检索 | [S4、S4a–S4d、S5、S7 / F3](native-tool-research.md#findings)，完整 URL 和定位见研究包 Sources。 |
-| openUI 是非公开接口，未知 UI 名称会静默无效。 | VERIFIED：签名、警告、示例 | [S2、S3 / F4](native-tool-research.md#findings)；[openUI](https://prodocs.lceda.cn/cn/api/reference/pro-api.sys_window.openui.html)。 |
-| PCB 编辑器有选择/导航接口，但不能据此证明原工具可控。 | VERIFIED：接口归属；原窗口效果 UNVERIFIED | [S4c、S4d / F5](native-tool-research.md#findings)。 |
-| bag-bom 的解析、精确匹配可参考，iBOM 选择适配不可直接照搬。 | VERIFIED：源码检查；具体复用程度待评估 | [输入记录 UPSTREAM-ADAPTER](planning-inputs.md#previously-inspected-source-evidence)，固定提交下 `barcodes.js:parse/match`、`matcher.js:buildIndex/match`、`scanner.js:select`。 |
-| 相机、Worker、WASM 在目标运行上下文能否工作。 | UNVERIFIED | [LCEDA-IFRAME](planning-inputs.md#lceda-iframe) 与研究包 F6。安全上下文和函数存在仅是预检。 |
-| 部分截图器件编号为空。 | VERIFIED：局部截图观察 | [USER-IMG-01](planning-inputs.md#screenshot-evidence)；不能推广为所有工程均缺编号。 |
-| 先证明原选择通道，再接摄像头。 | RECOMMENDED | [研究建议](native-tool-research.md#recommendation-to-plan)。 |
-
-参考源码始终只读。复用时核对固定提交并保留适用的 LICENSE、NOTICE、THIRD_PARTY_NOTICES.md；bag-bom 的 Apache-2.0 不能自动覆盖 LCEDA 导出代码、模型或其他依赖。
-
-## 5. 最小架构与行为合同
+## Architecture
 
 ```text
-用户开启摄像头
-  → 本地二维码解码
-  → 载荷解析与冲突检查
-  → 精确产品身份
-  → 当前原工具 BOM 身份索引
-  → 原工具选择适配器〔原处理器已找到，程序事件复用效果待验证〕
-  → 原 BOM 选中 / 原板图高亮
+Trusted native HTML → data-only extraction → exact BOM identity index
+Camera → local Worker/WASM decoding → identity and independent-frame checks
+Exact complete target set → original BOM-row single-click → original viewer
 ```
 
-### 原工具选择适配器
+The enhancer generates a new file; it does not overwrite the original or rebuild the vendor BOM/3D/2D viewer. The generated file retains executable vendor code. Compatibility is limited to the supplied export family and depends on version-fragile row/handler structure, not a stable public client API.
 
-这是拟议的内部合同，**不是声称已有同名 API**：
+## Selection contract
 
-- 绑定当前板、窗口/文档或导出产物及其版本。
-- 提供可核对的行/器件身份与位号集合。
-- 对精确目标执行原来的单击语义，不写焊接状态。
-- 能确认实际选中结果；调用返回成功本身不足以确认。
-- 定位和清除选择是可选能力，不能假定存在。
-- 只能控制普通编辑器，或必须重写原核心时，不符合合同。
+1. Accept only complete supplier C-codes or verified complete MPN identities. Preserve meaningful MPN suffixes. Do not infer identity from value, package or quantity.
+2. Require the full original row to express exactly the full target reference set. Aggregated mode is recommended; reject mixed identities, conflicts, missing identities, incomplete sets, hidden rows and unsupported multi-row selection.
+3. Dispatch the original single-click—not a guessed private RPC, checkbox click or synthesized double-click. Preserve any centering or side flip already performed by that single-click.
+4. Report the native selection outcome separately from decoding and identity matching. A previous highlight may remain after failure; never present it as a fresh success.
+5. Native manual interaction takes priority and pauses the camera. Invalidate stale asynchronous work after stop, restart or manual interaction.
+6. Do not auto-mark soldered/placed state, change design data, add progress persistence or promise synchronization with the client.
 
-### 精确匹配规则
+## Camera and decoder boundary
 
-1. C 编号完整匹配，不做子串、模糊或近似匹配；MPN 不丢后缀，必要时结合制造商消歧。
-2. 当前导出适配从已检查的 `bom_merge`/`comp_info`/`designator_info` 建索引，供应商编号和制造商编号只读明确字段；历史编辑器 `SupplierId` 假设不再适用。
-3. 无编号且无验证过的身份映射时转人工；不按参数、封装、数量猜测，也不在线补查。
-4. C 编号与 MPN 矛盾、多码尚未消歧、不支持格式时不自动选择。
-5. 同身份对应多个位号属于正常一对多，应完整列出，不误判为不同产品。
-6. 原聚合行若混有不同身份，不整行自动选中；只有能安全选中精确子集时才继续，否则提示人工。
+Camera access starts only after explicit user action and browser permission. Stop releases the camera; folding only changes panel visibility. Decoding stays local, using inline Blob Worker/WASM and pinned ZXing-WASM 3.1.6. Supported formats are QRCode, DataMatrix, Code128, Code39 and PDF417; no OCR or cloud fallback.
 
-### 防重复与过期结果
+Capture requests ideal 1920×1080 at 30 fps, with full-frame sampling capped at a 1920-pixel long edge and 2,073,600 pixels. Only one decode job is in flight, with at least 100 ms between starts and fresh-frame checks. Hardware may provide lower settings. See [performance notes](scanner-performance.md).
 
-- 新结果先撤销面板中的“本次成功”状态，再验证匹配。
-- 无匹配时，若不能安全清除原选择，明确显示“本次未匹配，板图可能仍为上一次选择”；不让旧高亮冒充新成功。
-- 去抖并锁存同码结果，避免持续刷选或抢占用户手动选择；允许显式再次选择。
-- 异步任务带会话代次和目标身份；停止、换板、换窗口后，晚到结果不得触发动作。
-- 目标关闭或身份改变时暂停扫描、作废旧索引并重新绑定。
-- 被原有过滤器隐藏的目标不能假报成功，也不擅自改过滤或焊接状态。
+## 0.2.0 acceptance requirements — pending
 
-### 媒体与资源
+- Bounded in-memory plaintext status, raw decoded payloads and frame counts; safe text rendering and copying with manual fallback. No images, uploads or persistence.
+- Distinguish no code, confirmation, identity rejection, repeat suppression and native selection outcome; preserve the existing generic non-BOM warning.
+- Confirm identity using two independent valid frames. Conflicting, unmatched and error results are not evidence of absence.
+- Suppress repeated selection while a confirmed code remains visible. Rearm after at least one second **and** two fresh empty frames, or explicit camera Start/device restart.
+- Do not permanently mark failed/unconfirmed selection as seen; allow bounded retries without a tight retry loop.
+- Check state transitions, copy fallback, manual priority, stale results, full-set selection and resource release before declaring the release validated. See [diagnostics specification](scan-diagnostics.md).
 
-- 用户明确操作后才申请相机；默认不保存帧，不上传。
-- 真正通过需取得可用视频帧，不以 `getUserMedia` 存在作为成功。
-- 解码库、Worker、WASM 离线可用；不默认加载 CDN。
-- 停止、关闭、断开和异常均需释放轨道、Worker、监听及临时资源。
-- iframe、file URL、本地服务是不同上下文，测试结果不能互相代替；若需要端口或服务，应另行列入授权。
-- jsQR 可作明确标注的 QR-only 诊断，不能冒充 ZXing 的全部码制支持。
+## Build and evidence boundaries
 
-## 6. 分阶段实施与放行门槛
+Build preflight checks all four output targets against source-path, realpath and file-identity aliases before writes; source preservation is checked by hash. External concurrent changes to paths or links are excluded from that guarantee.
 
-以下为未来建议，不是当前授权。
-
-### P0：确认路线和输入
-
-- **输入**：本计划、客户端完整版本、用户是否接受 L2。
-- **交付**：更新后的执行合同：所选路线、执行者、目标文件、允许操作及检查。
-- **放行**：下一步输入和权限明确；不因同意计划而推定安装、运行、摄像头或客户端控制许可。
-- **验证所有者**：Orchestrator，仅核对用户决定和合同。
-
-### P1：验证静态接入基础
-
-**L1 分支：**
-
-- 取得原窗口的受支持选择接口证据，包括入口、参数、目标板/窗口身份、版本、语义及副作用。
-- 证据可以是官方文档或官方明确确认，不限于书面工单。
-- 只有编辑器 API、存在搜索框、openUI 返回成功，均不放行。
-
-**L2 分支：**
-
-- 用户提供真实、非敏感原生 HTML；直接静态读取，不复制、修改、执行或上传。
-- 记录路径、大小、SHA-256、客户端版本及用户提供的导出时间。
-- 检查编号/MPN/位号/稳定 ID、层面与分组；检查原行点击到高亮/定位的调用关系。
-- 检查进度字段、存储/序列化代码、外链、资源/CSP，以及代码/模型/依赖条款。
-- 静态检查得到的是候选入口，不是运行成功。无需为了查结构先运行 HTML。
-
-**交付**：路线证据或产物检查记录。  
-**放行**：有足够身份数据及不重写原核心的接入候选；拟议修改的适用条款和风险可评估。  
-**停止**：必须重写核心、缺必要身份或原有工作流无法保留。许可不清阻断相应修改/分发，不阻断单纯只读检查。  
-**验证所有者**：后续明确分配的实现执行者，检查 V1。
-
-### P2：不接相机，先证明原工具选择
-
-- **输入**：P1、非敏感测试对象及单独批准的运行/原型文件范围。
-- **交付**：最小调用或适配器，比较手工单击与程序选择；记录真实目标位号、顶底层、分组和焊接进度前后状态。
-- **放行**：已知精确身份确实触发原工具正确选择，且设计和进度不变，满足 V3/V4。
-- **停止**：只能高亮编辑器、整组选错混合身份、结果不能核对，或更改了进度。
-- **授权门**：L1 明确客户端/测试工程/扩展安装范围；L2 明确测试衍生产物及运行上下文。涉及文件复制另交 Intern 并记录源/目标和不覆盖检查。此阶段不访问相机。
-- L2 若依赖导出物内部 DOM/回调，应先确认版本脆弱性、条款和接受范围；不与客户端宿主 DOM 注入混为一谈。
-- **验证所有者**：实现执行者，V3/V4。
-
-### P3：实现身份解析与无相机逻辑
-
-- **输入**：P2 已证明的适配器、实际 BOM 字段及批准的二维码文本样本。
-- **交付**：支持载荷清单、精确索引、冲突/混合组处理、目标代次防护与小范围单元/合同测试。
-- **放行**：V2 通过；每次自动选择均能追溯到明确身份和精确位号集合。
-- **停止**：需要按值/封装猜测，选中集合不完整或过期结果仍能执行。
-- **授权门**：批准实现文件集及依赖准备；依然不启用相机。
-- **验证所有者**：实现执行者，仅跑相关解析/索引/状态/适配测试。
-
-### P4：接入摄像头与离线解码
-
-- **输入**：P3、批准的解码资源、实际相机及选定运行上下文。
-- **交付**：启停和权限反馈、本地解码、去抖、错误处理与真实料袋实测记录。
-- **放行**：可用帧 → 解码 → 精确匹配 → 原工具正确选中，满足 V5。
-- **停止**：只有假相机/预检成功、需要未批准外部资源、关闭后仍占相机或出现错选。
-- **授权门**：明确摄像头访问、依赖安装及必要本地服务；不扩大到所有浏览器。
-- **验证所有者**：实现执行者，V5，并复用该会话核对 V4。
-
-### P5：集中验收和本地交付
-
-- **交付**：支持版本/格式、使用说明、失败回退、进度保存边界、适用通知及一份合并验收记录。
-- **放行**：V1–V7 的适用项完成；父会话核对范围与证据，不宣称未测能力。
-- **授权门**：个人本地验证与公开分发分开确认；公开分发须完成对应许可检查。
-- **验证所有者**：实现执行者归集证据，Orchestrator 负责 V7。
-
-## 7. 实现目录和责任边界（仅拟议）
-
-路线证明前不创建脚手架，不同时实现 L1/L2。
-
-```text
-implementation/
-  src/identity/     载荷解析、精确身份
-  src/bom/          原 BOM 只读索引、混合组检查
-  src/selection/    合同及仅所选路线的原工具适配器
-  src/scanner/      相机生命周期、解码、会话/去抖
-  src/ui/           启停、命中位号、失败和旧选择提示
-  tests/            有针对性的单元/适配合同测试
-  assets/decoder/   获批准的本地资源和通知
-```
-
-- 非 UI 软件实现可交 fixer；新增面板布局/交互若需设计，由 designer 负责确定；器件字段存在工程语义疑问时由 exec-pcb 只读核验。具体人员与文件集在派发时确定，同一文件集保持单写者。
-- L1 按实际 SDK 规则组织。脚手架前确认名称、显示名、描述、发布者和许可；不机械把 `engines.eda` 改成 `^4`，不把 CLI 最低版本当普通扩展最低版本。
-- L2 的结构由真实产物决定，不覆写用户原件，不重新生成 BOM/3D 核心。
-- `references/bag-bom` 不作为输出目录；新增配置、锁文件、构建和证据文件也须纳入范围。
-- 构建/测试前读取项目说明、环境锁和 `.devtools.json`（如有），按工作站合同验证并使用指定 Profile/包管理器；不凭环境 PATH 猜工具版本。
-
-## 8. 最小验证预算
-
-“实现执行者”指后续合同指定的一名验证责任人；不是当前已派发的任务。源码、模拟、实际查看器、实物相机是不同证据。
-
-| ID / 主张 | 唯一验证所有者 | 最低充分证据 |
-| --- | --- | --- |
-| V0 计划与边界一致 | Orchestrator | 阅读规划、执行合同、需求、研究和下载记录；核对引用、路径、待确认项。当前只做此项及下载检查。 |
-| V1 路线基础成立 | 实现执行者 | L1 接口原文/官方确认和版本；或 L2 路径/哈希/字段/调用关系静态记录。不得称动态成功。 |
-| V2 精确匹配和状态安全 | 实现执行者 | C 编号、必要 MPN、缺编号/不支持码、冲突/多码、同身份多位号、混合组、去抖、目标切换/晚到结果的单元和合同测试；保留命令、退出码、断言。 |
-| V3 原工具选择成立 | 实现执行者 | 授权实测手工单击与适配器对照：单个位号、同身份多位号、顶底层、混合组拒绝。记录 BOM 目标和实际板图结果；模拟不替代。定位若实现另测。 |
-| V4 设计与进度不变 | 实现执行者 | 复用 V3/P4 会话的前后记录核对设计修改状态、相关属性、人工进度及原分组/视图/层面/过滤/手工能力；L2 单记保存重开，不宣称客户端同步。 |
-| V5 实物和离线闭环 | 实现执行者 | 真实相机/真实标签、可用帧、正确原选择；拒绝、拔出、停止、关闭清理；断网加载本地 Worker/WASM。记录耗时、重复触发与错选。 |
-| V6 许可和项目检查 | 实现执行者 | 实际资产来源/版本/条款；未知项阻断相应修改或分发。执行项目要求的环境验证、lint/类型/构建及相关测试，保留命令/退出码。 |
-| V7 交付符合范围 | Orchestrator | 阅读变更产物与合并证据，检查授权、所选路线和声明；不无理由重跑已有有效证据。 |
-
-环境明确后再确定合理性能目标，不编造帧率/延迟保证。正确选择、进度不变和资源释放优先；项目规定的必需检查不能省略，但不为小改动反复跑无关全套测试。
-
-## 9. 风险与停止条件
-
-| 风险 | 处理与停止条件 |
-| --- | --- |
-| L1 无受支持入口 | 停在接口门，不猜 openUI，不把编辑器替代冒充成功。 |
-| L2 与原窗口不等价 | 检查真实产物；若需重写核心则停止。 |
-| 编号缺失或身份矛盾 | 提示人工，不猜测、不自动改器件属性。 |
-| 混合分组、隐藏目标 | 不整组选错或假报成功；保留手工操作，不偷偷改过滤/进度。 |
-| 晚到结果或板切换 | 作废会话/索引并暂停；不作用到错误目标。 |
-| 选择结果未知 | 先确认实际状态，不盲目重做有副作用的操作。 |
-| 设计或进度意外改变 | 停止并记录现状，不擅自“恢复”覆盖用户状态。 |
-| 相机未释放、外传或离线资源缺失 | 停止集成并定位原因，不放宽隐私边界。 |
-| 修改/分发条款不清 | 阻断相应行为；不把只读检查混为分发。 |
-| 同一问题反复失败 | 最多三次有证据的排查；变更超时不盲重试，原因不明可提前停止。 |
-
-超出当前合同的客户端操作、真实相机操作、文件复制、公开分发或外部接口变化，应更新合同并补足同意；批准范围内的派生文件生成、软件验证及内部实现细化不必重开全部规划。
-
-## 10. 输入与决策状态
-
-### Q1：是否接受评估原生导出 HTML？
-
-已答并更新：用户先批准静态检查，随后选择 **HTML 增强副本**，批准详细方案并要求参考 bag-bom 实现扫码。L2 实现和派生副本的软件测试现已授权；不包括 Agent 启动真实摄像头、客户端集成或公开分发。
-
-- **L1**：不再是当前目标；不访问立创安装目录。
-- **L2**：本地增强工具生成独立 HTML，保留原工具代码和界面核心，追加扫码输入。
-
-L3 不在这次选择中。
-
-### Q2：完整版本与实际产物
-
-用户已提供 `G:/Downloads/InteractiveBOM_PCB_Back_2026-11-6.html`，原始大小/哈希已记录，UTF-8 与数据/处理器关键入口已静态复核，见 [native-export-inspection.md](native-export-inspection.md)。
-
-`E:/EasyEDA` 仅为用户给出的软件位置，不是版本号；不访问该目录。导出时间仅有文件修改时间可参考。完整客户端版本可后补，不再阻塞针对这一原生产物的实现；不会因此宣称客户端内兼容性。
-
-未来需要补充新样本时，用户可手动准备（当前不要求重复导出）：
-
-1. 在“关于/版本信息”记录完整版本，不需提供账号信息。
-2. 选择可分享的非敏感测试 PCB，不改动正在焊接的工程或进度。
-3. 按官方入口：**工具 → 焊接辅助工具 → 导出 → 离线Html**。
-4. 保存到自选本地目录，记录路径和时间；不必双击执行，也不上传第三方解析网站。
-5. 告知路径。初步只读文本，不复制、改写、解包落盘、执行脚本或申请相机。
-
-当前样本只有顶层装配器件，底层真实行为不能仅凭此建立；可以先做合成底层合同测试，真实底层验收需以后补充适当样本，不要求提供生产资料。
-
-## 11. 规划阶段完成记录
-
-此前规划阶段交付为参考源码、来源记录和可审阅计划。其检查记录不代表扫码已实现或通过物理相机实测。用户现已批准 L2 实现，开发状态及最终验证必须另行记录，不追溯改写当时的证据。
-
-当时规划检查：Orchestrator 已阅读落盘计划与执行边界；检查 5 份 Markdown 文档的 13 个本地链接目标，无缺失；再次确认参考仓库仍为固定提交且工作区干净。规划阶段未执行构建、应用或摄像头测试；后续实现验收见下一节及验证记录。
-
-## 12. 当前实现切片与所有权
-
-- `output/html-enhancer.html`：本地选择原导出文件，生成增强 HTML 下载，不要求终端或 Node 安装。
-- `output/InteractiveBOM_PCB_Back_2026-11-6_扫码版.html`：针对当前样本的首次派生产物，原件保持不变。
-- `src/contracts.ts`：已冻结 UI/核心边界；实现时可增加非破坏性可选状态字段。
-- `src/ui/**`：designer 独占，只负责显示与用户操作回调，不读 BOM、不申请相机、不点击原查看器。
-- 其余新增源码、项目依赖锁、打包、测试、输出及新增使用/验证说明：核心 fixer 独占；不改原件、参考仓库或已有规划文档。
-- 本计划、合同、输入与原始研究文档：Orchestrator 维护。
-- 独立 code-reviewer 做只读正确性/安全复核；Orchestrator 合并验证并执行一次最终相关完整检查，复用仍有效的 focused evidence。
-
-增强方式为追加自有 UI/脚本而非改写 vendor 压缩核心。索引来自经验证的数据结构；实际 DOM 精确行适配、300ms 处理器和异步代次需要专项测试。多个普通单击不会自动累加选择集，不可据此伪报全部位号成功；当前界面不能安全表达完整目标时明确返回不支持。
-
-当前工作站选中的 Node Profile 已查询为 Node v24.22.2、pnpm 11.18.0。旧父目录政策中的 `D:/Dev/Bin/devrun.exe` 与 Station 下同名入口均不存在；不尝试修复工作站，使用当前全局规则指定的 `D:/Dev/Station/Profiles/node-24.ps1` 同进程激活。初始项目无 `.devtools.json`；若后续新增合同锁，须先运行当前验证器。项目依赖和构建行为由实际包清单/锁固定。
-
-## 13. 首版实现完成与验收边界（历史）
-
-- 已交付当前板扫码版及可重复使用的本地增强器，入口与操作见 [usage.md](usage.md)。追加自有代码和网络策略，不重写原厂查看器核心。
-- 父会话最终检查：类型检查、23/23 测试、scanner/enhancer UI 检查、构建、实际派生查看器 9 项浏览器检查及 4 项专项均通过，独立源码复审的两项 P1 已关闭。哈希与证据见 [verification.md](verification.md)。
-- 软件全链路使用合成 canvas 媒体流与真实内嵌 Worker/WASM；已证明 `C25900 → R1/R2/R4` 的原生行、引擎调用和画布与原手动单击一致，不自动勾选已焊接。
-- 原件 SHA-256 与参考仓库提交/干净状态最终复核不变。未操作 EDA、未开启真实摄像头、未上传数据。
-- 样本 50 个器件中 32 个缺有效身份，跳过自动匹配；不聚合多位号、跨多个原聚合行或过滤隐藏目标安全拒绝。真实料袋/媒体权限、底层实物样本、其他导出版本、保存重开进度仍未验证，不作为完成声明的一部分。
-
-## 14. 后续扫码性能改进
-
-用户报告实际扫码已能自动定位，但速度慢、容易不识别。本次已保留更多全帧细节、取消解码后的固定 220ms 空等、只采新帧并复用画布；保持身份冲突、连续两帧确认和非 BOM 提示不变。父会话已完成重建、32 项测试、9 项浏览器集成、实际合成媒体及 4 项生命周期专项，输出 `OPTIMIZED_FINAL_CHECKS_PASS`；独立源码复审未建立新缺陷。构建和测试统一使用 input 中的同哈希 Back 原件。软件测量与物理相机/光照分开记录，不把合成码成绩外推为实物识别率。成品哈希及限制见 [verification.md](verification.md)。
+Keep source reading, deterministic tests, generated-viewer integration, synthetic-media checks and physical-camera evidence distinct. Integration requires separately prepared untracked compatible exports/fixture configuration and isolated Chrome/Edge automation. Synthetic results do not establish physical label recognition or blanket browser/V4 compatibility. Current evidence belongs in [verification.md](verification.md), not in release requirements.

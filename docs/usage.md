@@ -1,50 +1,65 @@
-# 本地使用说明
+# Local usage
 
-## 1. 打开本次成品
+[English overview](../README.md) · [中文概览](../README.zh-CN.md) · [Documentation index](README.md)
 
-直接用桌面 Chrome/Edge 打开 `output/InteractiveBOM_PCB_Back_2026-11-6_扫码版.html`。这不是客户端插件，不会连接正在运行的 EDA，也不会与客户端同步进度。
+## 1. Prepare the native export and enhancer
 
-先在增强面板输入 `C25900` 并点击“定位”。本次样本的完整目标是 `R1、R2、R4`。应看到原 BOM 行选中及原板图响应；不应自动勾选“已焊接”。原生单击本来就可能居中/翻面，增强器保留此行为，不发送双击或额外强制缩放。
+In LCEDA PCB, choose **Tools → Soldering Assistance → Export → Offline HTML** (`工具 → 焊接辅助工具 → 导出 → 离线Html`). Keep the trusted original untouched; `input/board.html` is a generic example filename, not a supplied board.
 
-推荐使用“位号聚合”，并清除原查看器搜索/隐藏过滤。**不聚合模式只支持目标为单个位号的料号**；多个普通单击只会留下最后一个，增强器因此不会假报全部选中。一个料号若跨多个原生聚合行，也会拒绝而不是只选一部分。
+Use a **locally built** `output/html-enhancer.html`. Generated HTML and the vendor viewer are not included in Git or a source checkout. Developers can follow the [build instructions](../README.md#development); end users with built files need no Node.js, server or CDN.
 
-## 2. 开启扫码
+## 2. Generate a new enhanced file
 
-1. 先完成上面的手动定位检查。
-2. 点击“开启摄像头扫码”。浏览器可能询问摄像头权限；没有点击就不会申请。
-3. 获准后可从相机列表选设备，再点开启切换。名单仅在授权后读取。
-4. 一次只展示一个料袋，等待连续两帧得到同一个精确身份。支持的本地解码码制为 QRCode、DataMatrix、Code128、Code39、PDF417；无效/分段符号不作为匹配结果。
-5. 核对面板中的完整 C 编号、全部位号及原板图。真实标签/反光/焦距效果需要你现场验证。
+1. Open `output/html-enhancer.html` in desktop Chrome or Edge.
+2. Select the trusted, untouched native HTML—not CSV, XLSX or an already enhanced file.
+3. Download the new `*_扫码版.html`, for example `output/<board>_扫码版.html`.
+4. Open that new file. Keep the original separately and do not choose its name in the browser's save dialog.
 
-性能优化后的版本会请求 **1920×1080、30fps 的理想值**，不是设备必须满足的硬约束；浏览器仍可提供较低分辨率。全帧采样上限为长边 1920、约 207 万像素，不裁切中心、不关闭其他码制来制造“唯一命中”。相同尺寸会复用画布；解码完成后等待新的实际视频帧，而不是再固定闲等 220ms，同时最多每 100ms 开始一次解码、只保留一个在途任务。两次确认仍须来自不同新帧；冻结画面不会反复充当第二帧。
+The enhancer reads UTF-8/JSON data without evaluating the input scripts. **The generated file retains the executable vendor viewer**, so this is not a way to sanitize an untrusted HTML file. All enhancement and decoding are local.
 
-这会增加高分辨率单帧的处理量，弱设备未必更快；反光、失焦、过小的码、实际摄像头分辨率/帧率仍需现场检查。保持完整条码入镜、光照均匀、镜头清晰，避免强反光。旧 HTML 不会自动获得此优化，须重新生成扫码版；软件测量与剩余限制见 [扫码性能记录](scanner-performance.md)。原生单击约 300ms 的延迟及选择确认仍保留。
+When using a new build, close old tabs and reopen the new file. Previously generated board files do not update themselves; regenerate each from its untouched original using the new enhancer.
 
-同一身份在本次页面会话中只自动选择一次，避免抢占你后来的手动操作。要再次选择，使用“重新定位本次结果”或手动输入。停止后重新开启不会清空这个锁存。原生鼠标/键盘操作、手动输入、停止、隐藏页面、离开页面都会作废旧解码/待执行点击；原生手动操作和手动输入会暂停相机。
+## 3. Verify manual selection first
 
-“收起”只是折叠面板，不等于停止。请用“停止摄像头”释放相机。权限拒绝、设备断开、Worker/WASM 错误也会释放资源；迟到的授权流会立即停止轨道。
+1. Choose **aggregated references** (`位号聚合`) and clear search/visibility filters.
+2. Enter a complete supplier C-code from your own BOM and invoke manual location.
+3. Check the selected original BOM row, **all target references** and the board response. Scanning must never auto-check “soldered” (`已焊接`).
 
-## 3. 生成其他文件
+The enhancer reuses the original single-click. That click may already center or flip the view; no extra double-click is needed. Non-aggregated or multi-row targets that cannot express the complete target set are rejected rather than partially selected. Do not work around that safety check by interpreting the last of several single-clicks as a complete selection.
 
-1. 打开 `output/html-enhancer.html`，选择你信任的、未经增强的原生离线 HTML。
-2. 工具仅用严格 UTF-8 / JSON 解析数据，不 eval、不运行所选文件。
-3. 点击“下载扫码版 HTML”，保存为新的名字，再打开下载文件。不需要 Node.js、CDN 或本地服务。
-4. 重复选择文件时只保留最新一次结果；已增强文件、未知数据边界、多板块、重复位号/记录 ID、损坏编码会被拒绝。
+## 4. Start and stop scanning
 
-工具不会向文件系统写回原件。浏览器下载对话框仍由你控制：不要主动把下载改名覆盖原件。单文件含本地 Worker 和 WASM，无需保留旁边的 JS/WASM 文件。最大输入为 80MB。
+1. Click **Start camera** (`开启摄像头扫码`) and grant browser permission. Camera access is not requested automatically.
+2. Select a device if needed and explicitly start/restart it.
+3. Present one complete label at a time. Confirmation requires two independent valid frames with a consistent exact identity.
+4. Check the full identity, reference set and native viewer outcome before proceeding.
+5. Use **Stop camera** to release it. Folding the panel only reduces its size; it does not stop capture. Native manual interaction pauses scanning.
 
-## 精确身份与失败提示
+QRCode, DataMatrix, Code128, Code39 and PDF417 are decoded locally. There is no OCR, cloud lookup or value/package guessing. Camera use from local files depends on browser/runtime policy and permission. If access is unavailable, use manual selection and normal browser permission controls; do not disable browser security.
 
-- 手动输入只接受完整 `C` + 数字，可去除首尾空格/忽略字母大小写；不接受子串、内部空格、后缀、阻值或封装。
-- 扫码解析参考固定版本 bag-bom：完整料号、LCSC 产品网址（只解析、不访问）、平面 LCSC/JLC `pc`/`pm` 记录以及其支持的结构化供应商记录。对象必须是完整 JSON 引号格式，或键和值都不加引号的格式，不接受混搭。每个明确身份字段必须通过完整验证并保留在上游解析结果中；不支持的纯字母 MPN、其他身份别名、重复/大小写等价字段、转义、嵌套/损坏记录及未解析的同帧身份均拒绝，不能静默丢掉矛盾身份。
-- 制造商料号仅来自明确的 `Manufacturer Part` 字段，并保留真实后缀。扫码 C 编号和 MPN 相互矛盾、另一个码无法确认、多身份同组时全部拒绝。
-- `lc_code` 是与 `comp_info` 完整关联的复合键，不是随意截取的料号。缺 Supplier Part 的器件不会按值推测。本次 50 个器件中有 32 个缺有效身份而跳过自动匹配；原生手动选择仍保留。
-- “未确认/不支持”不是已选中。无法安全清除原选择，所以面板明确提示**之前的高亮可能仍保留**；请不要把旧高亮当成本次成功。
+## 5. Interpret a rejection correctly
 
-## 隐私、兼容和进度
+| Observation | Meaning / action |
+| --- | --- |
+| No usable code | Decoding has not produced a usable result; improve framing, focus and light. This is not a BOM mismatch. |
+| Raw text decoded, but not in BOM | Decoding succeeded; identity matching did not. The existing generic non-BOM warning remains applicable. |
+| Mixed, conflicting, incomplete or missing identity | No automatic choice. Inspect the label and original BOM manually. |
+| Hidden row or unsupported multi-row/full-set selection | Clear filters/use aggregation and verify the exact set; do not accept a subset. |
+| Selection unconfirmed or rejected | The previous highlight may remain. Do not treat it as the current result. |
+| Native manual action | Camera scanning pauses so manual work takes priority. |
 
-新增代码不上传帧、不保存图像、不使用云端，也不新增持久化进度。附加 CSP 阻断原包后台 HTTP/API、字体及远程资源，字体使用本机回退。手动点击原厂外部链接仍可能打开外部网页，请自行决定；自动适配不按 Shift/Ctrl、不点链接/复选框。
+Only complete supplier C-codes or verified complete MPNs can produce automatic selection. Missing identity is not repaired by matching resistance, package or quantity. The source export family is the compatibility boundary; there is no blanket V4 guarantee.
 
-适配器针对本次导出的桌面 DOM 结构核验，不猜私有 RPC，不改写厂商压缩核心。其他版本/窄屏变更可能被安全拒绝。本次没有底层器件；真实底层翻面未验证。原查看器已有会话/保存能力维持原状，未验证跨会话焊接进度，也不承诺与客户端同步。
+## 6. 0.2.0 diagnostics and repeat behavior — pending release validation
 
-原生查看器的公开分发权未知：请仅本机使用生成的含板图文件。成品中的“第三方许可”可展开查看完整 Apache/MIT 等通知。
+The source now supplies bounded in-memory plaintext status, raw decoded payloads and frame counts, with the UI's explicit Copy/manual fallback. Waiting, an actually empty decoded frame, first-frame confirmation, rejection, repeat/cooldown suppression and native selection outcomes are distinct. The counter/time continue updating when identical text is coalesced. They count accepted, completed new-frame decoding results—not camera exposure FPS. Images and logs are not automatically uploaded, saved or copied.
+
+A continuously visible, natively confirmed code suppresses repeated selection. To scan it again automatically, remove it until **at least two fresh empty decoded frames span at least one second**, then return it for normal two-frame confirmation; explicit camera Start/device restart also resets eligibility. A single glare/empty frame, no new frames, conflicts, unmatched results and errors do not prove absence. A→B→A is allowed after normal confirmation. Failed/cancelled/unconfirmed selection is not permanently marked seen; automatic retries have a one-second cooldown.
+
+Stop/native manual interaction does not resume the camera by itself: explicitly Start it again. Manual location and explicit reselect remain available. Text history is limited to 20 events and 16KiB UTF-8; huge/excess payloads have visible truncation markers, while **matching still receives every original, untruncated payload**. Control/bidi characters and backslashes are visibly escaped. Close/reload discards this memory-only history. These are implemented-source behaviors with focused tests, **not a final validated 0.2.0 artifact claim**; old HTML must be regenerated. See [scan diagnostics](scan-diagnostics.md).
+
+## Privacy, performance and progress
+
+Capture requests ideal 1920×1080/30 fps but hardware can downgrade. Full-frame processing preserves competing codes; high-detail frames can be slower. Wrinkles, reflections, focus and physical occlusion still limit decoding. See [performance limits](scanner-performance.md); synthetic results are not physical recognition rates.
+
+This is not a client extension and does not synchronize progress with LCEDA. No new progress persistence is promised. Original viewer/board/model rights are not granted by the project's MIT license; public vendor-viewer redistribution is not established. **Do not publish generated viewer HTML.** See [third-party notices](../THIRD_PARTY_NOTICES.md) and [verification](verification.md).

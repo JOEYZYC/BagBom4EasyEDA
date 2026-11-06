@@ -1,15 +1,32 @@
-# Reference Download Verification
+# Reference source and dependency attribution
 
-Date: 2026-11-06
-Classification: VERIFIED — filesystem inspection and read-only Git commands.
+## Pinned reference
 
-- Source: `https://github.com/egethropic/bag-bom.git`
-- Destination: `G:/_MyProject/BagBom/references/bag-bom`
-- Branch reported by download owner: `main`
-- Commit independently verified by Orchestrator: `1fc1e0b2abd8b023ba01e6000c4110d72d94860c`
-- Origin independently verified; matches the requested repository.
-- Working tree independently verified clean (`git status --porcelain` empty).
-- Required reference files present: README.md, LICENSE, NOTICE, THIRD_PARTY_NOTICES.md, package.json, bag_bom/plugin.py, bag_bom/web/barcodes.js, bag_bom/web/matcher.js.
-- Parent directly inspected README.md, NOTICE, package.json and plugin.py. Upstream package version is 0.2.1; original license is Apache-2.0.
-- Dependencies were not installed, code was not executed, and no build/tests were run. Generated barcode/OCR binaries are not included in the source checkout; downloading source is not installation of a usable runtime package.
-- Reference checkout is not the future implementation workspace. Preserve upstream files unchanged; no future automatic update or overwrite is authorized by this download.
+- Upstream: <https://github.com/egethropic/bag-bom>
+- Read-only location: `references/bag-bom`
+- Pinned public commit: `1fc1e0b2abd8b023ba01e6000c4110d72d94860c`
+- License: **Apache-2.0**, separate from this project's original MIT-licensed code/docs.
+
+**VERIFIED — recorded source/provenance inspection:** the reference was checked against this public origin and commit. This record is not a live checkout audit or an upstream runtime result.
+
+The source build requires this reference checkout; the main repository does not include it. If absent, developers may prepare it with:
+
+```sh
+git clone https://github.com/egethropic/bag-bom.git references/bag-bom
+git -C references/bag-bom checkout --detach 1fc1e0b2abd8b023ba01e6000c4110d72d94860c
+```
+
+Keep it unchanged. Reference source is not an installed runtime or a ready-made LCEDA viewer; its iBOM selection adapter cannot simply substitute for the original exported viewer's row-click adapter.
+
+Useful pinned-source locators:
+
+- `references/bag-bom/bag_bom/web/barcodes.js`: `parse` / `match`, supplier payload and exact-identity handling.
+- `references/bag-bom/bag_bom/web/matcher.js`: `buildIndex` / `match`, identity indexing.
+- `references/bag-bom/bag_bom/web/scanner.js`: selection/lifecycle reference, requiring platform-specific adaptation.
+- `references/bag-bom/bag_bom/web/barcode-worker.js`: decoder-worker reference.
+
+## Notices and licensing boundary
+
+Retain applicable bag-bom Apache copyright, license and adapted-worker modification notices. The pinned decoder is **ZXing-WASM 3.1.6**; relevant dependency terms include zxing-wasm (MIT), ZXing-C++ (Apache-2.0), stb (MIT/public domain) and Emscripten (MIT/NCSA).
+
+See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) for the authoritative notice inventory and [LICENSE](../LICENSE) for this project's original MIT-licensed material. Neither changes upstream licenses or grants rights to vendor viewer code, board data or models. Public redistribution of generated viewer HTML has not been established; keep it local rather than publishing it.
