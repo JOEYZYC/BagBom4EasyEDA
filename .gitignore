@@ -1,0 +1,11 @@
+node_modules/
+tests/.generated/
+# Generated files may contain the user's PCB/models and unapproved vendor redistribution.
+output/
+# User-supplied PCB exports and the separate read-only upstream checkout.
+input/
+references/
+# Local credentials/configuration must never enter the source repository.
+.env
+.env.*
+!.env.example

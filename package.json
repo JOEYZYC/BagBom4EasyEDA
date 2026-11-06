@@ -1,0 +1,25 @@
+{
+  "name": "bagbom4easyeda",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JOEYZYC/BagBom4EasyEDA.git"
+  },
+  "type": "module",
+  "packageManager": "pnpm@11.18.0",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "test:browser": "node scripts/browser-check.mjs",
+    "test:ui": "node src/ui/check.mjs"
+  },
+  "dependencies": { "zxing-wasm": "3.1.6" },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "esbuild": "0.25.12",
+    "playwright-core": "1.56.1",
+    "typescript": "5.9.3"
+  }
+}
