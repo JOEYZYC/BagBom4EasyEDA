@@ -26,4 +26,4 @@
 
 0.2.0 has passed local software verification, not physical-camera validation. Generated HTML and private native exports are not supplied by the source repository.
 
-Current `main` uses Apache-2.0 for original project code/docs; `v0.2.0` remains its historical MIT snapshot. License-change build/notice verification is separate from the recorded software results. GitHub Release publication is paused; no new version/tag is assumed.
+The `v0.2.1` release packages the verified tool under Apache-2.0; `v0.2.0` remains its historical MIT snapshot. Only the standalone enhancer and license/notice files belong in Release attachments, never board/viewer exports. See the [download instructions](../README.md#download-and-use).

@@ -6,9 +6,9 @@ Repository: <https://github.com/JOEYZYC/BagBom4EasyEDA>.
 
 The **0.1.0 baseline** was verified and pushed without force. **0.2.0 has passed local software verification**, including plaintext diagnostics, same-code rearming and rebuilt HTML. Local verification, commits and tags do not establish remote publication; confirm that separately. See [verification](verification.md) and [design requirements](implementation-plan.md).
 
-Current `main` adopts **Apache-2.0** for original project code/docs; see [LICENSE](../LICENSE) and [NOTICE](../NOTICE). The historical `v0.2.0` tag retains its original MIT snapshot. Preserve existing tags and history: no force retag, history rewrite or new version/tag is assumed.
+The **v0.2.1** patch release packages the verified tool under **Apache-2.0**; see [LICENSE](../LICENSE) and [NOTICE](../NOTICE). The historical `v0.2.0` tag retains its original MIT snapshot. Preserve existing tags and history without force retagging or rewriting.
 
-The latest authorized action is to commit and non-force push the reviewed license change after applicable validation. GitHub Release publication is paused; no Release has been created, and Apache-labeled assets must not be attached to the historical MIT tag. The license-change build, generated-viewer checks and full embedded notices were verified separately; see the verification record.
+Release attachments are limited to the standalone `html-enhancer.html`, `LICENSE`, `NOTICE` and `THIRD_PARTY_NOTICES.txt`. Verify uploaded identity before publishing; do not attach Apache-labeled assets to the historical MIT tag. The license-change build, generated-viewer checks and full embedded notices were verified separately; see the verification record.
 
 ## Tracked and local-only material
 

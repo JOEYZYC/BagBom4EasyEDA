@@ -8,11 +8,11 @@
 
 ## 状态
 
-**0.2.0 已通过本地软件验证**，包括有界纯文本扫码诊断、复制及手动复制降级、同码重新识别。实体标签识别与相机权限仍须在你的实际环境中验证。参见[扫码诊断](docs/scan-diagnostics.md)与[验证记录](docs/verification.md)。
+**v0.2.1 将已验证的扫码工具以 Apache-2.0 许可打包发布。** 0.2.0 运行代码已通过本地软件验证，包括有界纯文本诊断、复制及手动复制降级、同码重新识别。实体标签识别与相机权限仍取决于你的实际环境。参见[扫码诊断](docs/scan-diagnostics.md)与[验证记录](docs/verification.md)。
 
-## 使用本机构建文件
+## 下载与使用
 
-Git 仓库及源码检出**不包含生成的 HTML 或原厂查看器**。请另行准备兼容的原生导出，按下文在本机构建，或使用自己已经构建的文件。
+下载 [**v0.2.1 的 html-enhancer.html**](https://github.com/JOEYZYC/BagBom4EasyEDA/releases/download/v0.2.1/html-enhancer.html)，或按下文在本机构建。源码检出不包含生成的 HTML。下载的工具**不含原厂查看器或板图数据**，需要自行提供可信的原生导出。
 
 1. 在立创 PCB 中选择 **工具 → 焊接辅助工具 → 导出 → 离线Html**。
 2. 用桌面 Chrome 或 Edge 打开本机构建的 `output/html-enhancer.html`。
@@ -74,4 +74,4 @@ pnpm exec node scripts/browser-check.mjs --refinement
 
 本项目的 Apache-2.0 许可**不授予**原厂查看器、板图数据或模型的权利。尚未建立原厂查看器的公开再分发授权，请勿公开发布生成的查看器 HTML。
 
-历史 `v0.2.0` 标签保留其原始 **MIT** 许可快照，不改写现有标签或历史。本次许可变更以当前 `main` 为准。Apache-2.0 构建及内嵌通知已另行验证，参见[验证记录](docs/verification.md)。此处不宣布新版本、标签或 GitHub Release。
+历史 `v0.2.0` 标签保留其原始 **MIT** 许可快照，不改写现有标签或历史。Apache-2.0 版本请使用 `v0.2.1`。构建及内嵌通知已另行验证，参见[验证记录](docs/verification.md)。

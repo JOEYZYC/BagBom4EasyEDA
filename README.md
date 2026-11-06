@@ -8,11 +8,11 @@ This is an independent browser enhancement—not a client extension, official AP
 
 ## Status
 
-**0.2.0 has passed local software verification**, including bounded plaintext scan diagnostics, copying with a manual fallback, and same-code rearming. Physical-label recognition and camera permissions still require testing on your own setup. See [diagnostics](docs/scan-diagnostics.md) and the [verification record](docs/verification.md).
+**v0.2.1 packages the verified scanner under Apache-2.0.** The 0.2.0 runtime passed local software verification, including bounded plaintext diagnostics, copying with a manual fallback, and same-code rearming. Physical-label recognition and camera permissions still depend on your setup. See [diagnostics](docs/scan-diagnostics.md) and the [verification record](docs/verification.md).
 
-## Use locally built files
+## Download and use
 
-Generated HTML and the original vendor viewer are **not included in the Git repository or a source checkout**. Prepare a compatible native export and build locally as described below, or use files you have already built locally.
+Download [**html-enhancer.html from v0.2.1**](https://github.com/JOEYZYC/BagBom4EasyEDA/releases/download/v0.2.1/html-enhancer.html), or build it locally as described below. The source checkout does not include generated HTML. The downloadable tool contains **no vendor viewer or board data**; supply your own trusted native export.
 
 1. In LCEDA PCB, choose **Tools → Soldering Assistance → Export → Offline HTML** (`工具 → 焊接辅助工具 → 导出 → 离线Html`).
 2. Open the locally built `output/html-enhancer.html` in desktop Chrome or Edge.
@@ -74,4 +74,4 @@ The project draws on [egethropic/bag-bom](https://github.com/egethropic/bag-bom)
 
 The project's Apache-2.0 license does **not** grant rights to the vendor viewer, board data or models. Public redistribution of the vendor viewer has not been established; do not publish generated viewer HTML.
 
-The historical `v0.2.0` tag retains its original **MIT** license snapshot; existing tags and history are not rewritten. Current `main` is authoritative for the license change. The Apache-2.0 build and embedded notices were verified separately; see [verification](docs/verification.md). No new version/tag or GitHub Release is announced here.
+The historical `v0.2.0` tag retains its original **MIT** license snapshot; existing tags and history are not rewritten. Use `v0.2.1` for the Apache-2.0 release. The build and embedded notices were verified separately; see [verification](docs/verification.md).

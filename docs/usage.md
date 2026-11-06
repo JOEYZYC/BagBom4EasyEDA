@@ -6,7 +6,7 @@
 
 In LCEDA PCB, choose **Tools → Soldering Assistance → Export → Offline HTML** (`工具 → 焊接辅助工具 → 导出 → 离线Html`). Keep the trusted original untouched; `input/board.html` is a generic example filename, not a supplied board.
 
-Use a **locally built** `output/html-enhancer.html`. Generated HTML and the vendor viewer are not included in Git or a source checkout. Developers can follow the [build instructions](../README.md#development); end users with built files need no Node.js, server or CDN.
+Download [html-enhancer.html from v0.2.1](https://github.com/JOEYZYC/BagBom4EasyEDA/releases/download/v0.2.1/html-enhancer.html), or use a locally built `output/html-enhancer.html`. The tool contains no vendor viewer or board data. Generated HTML is not included in a source checkout. Developers can follow the [build instructions](../README.md#development); end users need no Node.js, server or CDN.
 
 ## 2. Generate a new enhanced file
 

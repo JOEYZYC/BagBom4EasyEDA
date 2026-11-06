@@ -6,7 +6,7 @@
 
 The earlier v0.1.0 baseline had 32 unit/contract tests, 9 generated-viewer checks and 4 lifecycle refinements, and its source/tag was pushed without force. The current results below were established for 0.2.0 rather than inferred from that baseline. See [development requirements](implementation-plan.md) and [scan diagnostics](scan-diagnostics.md).
 
-The historical `v0.2.0` tag retains its MIT license snapshot. Current `main` adopts Apache-2.0 for original project code/docs without rewriting that tag or history. The recorded software results below predate license-change validation; they are not a fresh pass for the Apache-2.0 build or generated notices. No new version/tag or published GitHub Release is established by this record.
+The historical `v0.2.0` tag retains its MIT license snapshot. The `v0.2.1` patch packages the verified runtime under Apache-2.0 without rewriting that tag or history. The original software results below predate license-change validation; separate Apache-2.0 packaging evidence is recorded below. Release publication must be verified on GitHub rather than inferred from local checks.
 
 ## Configuration and evidence types
 
@@ -72,7 +72,7 @@ The root [Apache-2.0 LICENSE](../LICENSE) was checked against the standard text,
 
 Only license metadata, notice packaging and documentation changed; unchanged type/unit/UI/camera/refinement evidence above was reused. This packaging verification is separate from the historical MIT-tag build and does not establish new physical-camera performance.
 
-GitHub Release creation has not been completed and is paused for this change. Do not attach Apache-labeled assets to the historical MIT `v0.2.0` tag. The authorized license-change commit/non-forced push is not recorded here as completed; no new version/tag is assumed.
+For `v0.2.1`, release preparation changes package version and public documentation, not scanner algorithms or notice inputs. A fresh build reproduced the exact validated Apache-2.0 tool and notices hashes, so the unchanged runtime evidence was reused. Verify the remote tag, attachment allowlist, uploaded sizes/digests and final publication state separately. Never attach these assets to the historical MIT `v0.2.0` tag.
 
 ## Reproducing checks
 
