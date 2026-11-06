@@ -1,6 +1,6 @@
 # Scanner capture and performance limits
 
-These notes describe bounded software behavior and summarize prior synthetic evidence. They do not establish real-label recognition rates, hardware A/B improvements or final validation of the 0.2.0 development target. See [verification](verification.md) for release evidence and [diagnostics](scan-diagnostics.md) for pending behavior.
+These notes describe bounded software behavior and summarize prior synthetic evidence. They do not establish real-label recognition rates or hardware A/B improvements. See [verification](verification.md) for current 0.2.0 software evidence and [diagnostics](scan-diagnostics.md) for text output and repeat behavior.
 
 ## Capture and scheduling
 
@@ -23,7 +23,7 @@ Two independent valid frames are required to confirm an identity. Decoding succe
 
 **VERIFIED — recorded prior synthetic benchmark evidence, not a current release result:** full-detail robust decoding returned complete expected results for **40/40** measured synthetic cases. Higher-detail frames cost more per decode; the improvement is not that every individual frame decodes faster. Retaining detail and removing fixed idle waiting trade extra single-frame cost against capture fidelity and confirmation scheduling.
 
-Reducing robust options lost relevant codes in synthetic cases, so that candidate was not adopted. Tests of generated symbols and synthetic video do not establish an improvement for wrinkled bags, reflections, small printed labels or a particular physical camera. They do not establish final 0.2.0 release readiness.
+Reducing robust options lost relevant codes in synthetic cases, so that candidate was not adopted. Tests of generated symbols and synthetic video do not establish an improvement for wrinkled bags, reflections, small printed labels or a particular physical camera. Those physical-performance limits remain after software verification.
 
 ## Reproduction prerequisites
 

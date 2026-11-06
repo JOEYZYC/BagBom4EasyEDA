@@ -50,13 +50,15 @@ QRCode, DataMatrix, Code128, Code39 and PDF417 are decoded locally. There is no 
 
 Only complete supplier C-codes or verified complete MPNs can produce automatic selection. Missing identity is not repaired by matching resistance, package or quantity. The source export family is the compatibility boundary; there is no blanket V4 guarantee.
 
-## 6. 0.2.0 diagnostics and repeat behavior — pending release validation
+## 6. Diagnostics and repeat behavior
 
-The source now supplies bounded in-memory plaintext status, raw decoded payloads and frame counts, with the UI's explicit Copy/manual fallback. Waiting, an actually empty decoded frame, first-frame confirmation, rejection, repeat/cooldown suppression and native selection outcomes are distinct. The counter/time continue updating when identical text is coalesced. They count accepted, completed new-frame decoding results—not camera exposure FPS. Images and logs are not automatically uploaded, saved or copied.
+The 0.2.0 files supply bounded in-memory plaintext status, raw decoded payloads and frame counts, with explicit Copy/manual fallback. Waiting, an actually empty decoded frame, first-frame confirmation, rejection, repeat/cooldown suppression and native selection outcomes are distinct. The counter/time continue updating when identical text is coalesced. They count accepted, completed new-frame decoding results—not camera exposure FPS. Images and logs are not automatically uploaded, saved or copied.
 
 A continuously visible, natively confirmed code suppresses repeated selection. To scan it again automatically, remove it until **at least two fresh empty decoded frames span at least one second**, then return it for normal two-frame confirmation; explicit camera Start/device restart also resets eligibility. A single glare/empty frame, no new frames, conflicts, unmatched results and errors do not prove absence. A→B→A is allowed after normal confirmation. Failed/cancelled/unconfirmed selection is not permanently marked seen; automatic retries have a one-second cooldown.
 
-Stop/native manual interaction does not resume the camera by itself: explicitly Start it again. Manual location and explicit reselect remain available. Text history is limited to 20 events and 16KiB UTF-8; huge/excess payloads have visible truncation markers, while **matching still receives every original, untruncated payload**. Control/bidi characters and backslashes are visibly escaped. Close/reload discards this memory-only history. These are implemented-source behaviors with focused tests, **not a final validated 0.2.0 artifact claim**; old HTML must be regenerated. See [scan diagnostics](scan-diagnostics.md).
+Stop/native manual interaction does not resume the camera by itself: explicitly Start it again. Manual location and explicit reselect remain available; reselect is disabled while a different code is awaiting confirmation, so it cannot select the previous target instead. A qualified two-frame request survives brief empty frames; any later receipt identifies that earlier target without pretending the latest empty frame decoded it.
+
+Text history is limited to 20 events and 16 KiB UTF-8; huge/excess payloads have visible truncation markers, while **matching still receives every original, untruncated payload**. Control/bidi characters and backslashes are visibly escaped. Close/reload discards this memory-only history. These behaviors passed local software integration checks; old HTML must be regenerated. Physical-label performance remains unverified. See [scan diagnostics](scan-diagnostics.md).
 
 ## Privacy, performance and progress
 

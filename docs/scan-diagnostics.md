@@ -1,10 +1,10 @@
 # Scan diagnostics and same-code rearming
 
-**Status: 0.2.0 development target, pending final release validation.** The verified 0.1.0 baseline does not establish completion of these features. This page specifies intended behavior; see [verification.md](verification.md) for actual evidence.
+**Status: 0.2.0 passed local software verification.** This page describes the tested behavior; physical-camera recognition remains unverified. See [verification.md](verification.md) for evidence and limits.
 
 ## Plaintext observations
 
-The target exposes bounded, in-memory plaintext status, raw decoded payloads and frame counts. Copy should offer a manual text-selection/copy fallback when the browser clipboard operation is unavailable. Render decoded content as text, not HTML. Do not save frames, upload logs or persist diagnostic history.
+The panel exposes bounded, in-memory plaintext status, raw decoded payloads and frame counts. Copy offers a manual text-selection/copy fallback when clipboard access is unavailable or denied. Decoded content is rendered as text, not HTML. No frames are saved, logs uploaded or diagnostic history persisted. History is limited to 20 events and 16 KiB UTF-8; display truncation is explicit and never changes matching input.
 
 Raw payloads may contain private supplier/order data. Review and redact before sharing; local-only handling does not make the content suitable for a public issue.
 
@@ -18,6 +18,8 @@ Raw payloads may contain private supplier/order data. Review and redact before s
 
 The existing generic non-BOM warning is unchanged. Displaying raw decoded text from an off-BOM label does not mean decoding failed or that selection is safe. Rejection may leave a previous board highlight visible.
 
+Counts/time advance for accepted completed new-frame decoding results, not physical camera exposure FPS. Identical text is coalesced without freezing the counter. A qualified target may complete native selection after a later empty frame: its receipt is labeled with that earlier target, while the latest no-code diagnostic remains truthful.
+
 ## Repeat state requirements
 
 1. Require **two independent valid frames** to confirm an exact identity.
@@ -26,6 +28,7 @@ The existing generic non-BOM warning is unchanged. Displaying raw decoded text f
 4. Conflicting codes, unmatched identities and errors are **not absence** and must not satisfy the empty-frame gate.
 5. Failed, cancelled or unconfirmed native selection must not become permanently seen. Retries must be bounded rather than continuously firing.
 6. Manual native interaction pauses the camera and invalidates stale work. Stop releases the camera; folding does not.
+7. While a different identity is waiting for its second frame, reselect is disabled rather than selecting the previous target. A qualified two-frame request is not cancelled merely by a brief empty/glare frame.
 
 ## Practical troubleshooting
 
@@ -35,4 +38,4 @@ The existing generic non-BOM warning is unchanged. Displaying raw decoded text f
 - If a visible code is suppressed, remove it fully until the rearm conditions are met, or explicitly restart the camera. Do not infer that the decoder has stopped working solely from a lack of repeated selections.
 - For a new build, close old tabs and open the new generated file. Regenerate other boards from untouched originals using the new enhancer.
 
-No claim is made here that physical camera permissions, real-label performance or final 0.2.0 integration have been validated. See [usage](usage.md) and [performance limits](scanner-performance.md).
+Physical camera permissions and real-label performance have not been validated by these software checks. See [usage](usage.md) and [performance limits](scanner-performance.md).

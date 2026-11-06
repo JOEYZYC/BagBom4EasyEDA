@@ -4,7 +4,7 @@ Repository: <https://github.com/JOEYZYC/BagBom4EasyEDA>.
 
 ## Release boundary
 
-The **0.1.0 baseline** was verified and pushed without force. **0.2.0 remains a development target pending final release validation**, including plaintext diagnostics and same-code rearming. Do not use old baseline evidence to describe new features as released. See [verification](verification.md) and [design requirements](implementation-plan.md).
+The **0.1.0 baseline** was verified and pushed without force. **0.2.0 has passed local software verification**, including plaintext diagnostics, same-code rearming and rebuilt HTML. Local verification, commits and tags do not establish remote publication; confirm that separately. See [verification](verification.md) and [design requirements](implementation-plan.md).
 
 ## Tracked and local-only material
 

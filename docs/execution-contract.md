@@ -27,13 +27,13 @@ Build preflight must check all four output targets for source-path, realpath and
 
 The enhancer does not execute selected input during extraction, but generated HTML retains the executable vendor viewer. Only trusted exports are suitable. Project MIT licensing does not grant viewer, board or model rights; public vendor-viewer redistribution has not been established. Do not publish generated viewer HTML.
 
-## 0.2.0 development authorization — validation pending
+## 0.2.0 diagnostics and repeat-state authorization
 
 Implement bounded in-memory plaintext diagnostics with raw decoded payloads, frame counts and distinct no-code, confirmation, rejection, repeat-suppression and native-outcome states. Use safe text rendering and user-triggered copying with a manual fallback; do not save images, upload logs or persist history.
 
 Replace session-lifetime repeat prohibition with presence-based rearming: suppress a continuously visible confirmed code; rearm after at least **one second and two fresh empty frames**, or explicit camera Start/device restart. Conflicting, unmatched and error results are not absence. Failed/cancelled/unconfirmed native selection must not become permanently seen; retries must be bounded.
 
-Core and UI integration, rebuilding and affected checks must be reconciled before a 0.2.0 release claim or source/tag publication. The verified 0.1.0 baseline is not evidence that these changes have passed. See [diagnostics](scan-diagnostics.md) and [verification](verification.md).
+Core/UI integration, rebuilding and affected software checks have now been reconciled for 0.2.0; their actual results and physical-use limits are recorded in [verification](verification.md). That local evidence does not establish remote publication. Preserve these validation gates for later changes. See [diagnostics](scan-diagnostics.md).
 
 ## Publication and repository authorization
 

@@ -21,9 +21,9 @@ Add local barcode input to the original LCEDA / EasyEDA Pro soldering-assistance
 - Treat a failed new selection separately from old highlighting, which may remain visible.
 - Read source HTML as data without execution during enhancement; require trust because generated HTML retains the executable vendor viewer.
 
-## Development target
+## Current software version
 
-The verified and non-force-pushed 0.1.0 baseline is distinct from the **0.2.0 development target, pending final release validation**. The target adds bounded in-memory plaintext diagnostics and repeat rearming without changing identity or original-selection safety rules. See [design requirements](implementation-plan.md) and [scan diagnostics](scan-diagnostics.md).
+**0.2.0 passed local software verification** for bounded in-memory plaintext diagnostics and repeat rearming without changing identity or original-selection safety rules. Physical recognition and remote publication are separate claims. See [design requirements](implementation-plan.md), [scan diagnostics](scan-diagnostics.md) and the [verification record](verification.md).
 
 ## Compatibility and rights
 

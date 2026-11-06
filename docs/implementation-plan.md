@@ -5,7 +5,7 @@ This document describes the current export-enhancement design, not a client-exte
 ## Release status
 
 - **0.1.0:** verified baseline, pushed without force.
-- **0.2.0:** development target; plaintext diagnostics and revised same-code rearming remain pending final release validation. Do not treat baseline results as validation of this work.
+- **0.2.0:** local software verification completed for plaintext diagnostics, same-code rearming and rebuilt HTML. This is not a physical-camera or remote-publication claim; see the current verification record.
 
 ## Architecture
 
@@ -32,11 +32,13 @@ Camera access starts only after explicit user action and browser permission. Sto
 
 Capture requests ideal 1920×1080 at 30 fps, with full-frame sampling capped at a 1920-pixel long edge and 2,073,600 pixels. Only one decode job is in flight, with at least 100 ms between starts and fresh-frame checks. Hardware may provide lower settings. See [performance notes](scanner-performance.md).
 
-## 0.2.0 acceptance requirements — pending
+## 0.2.0 acceptance requirements — verified in the tested software
 
 - Bounded in-memory plaintext status, raw decoded payloads and frame counts; safe text rendering and copying with manual fallback. No images, uploads or persistence.
 - Distinguish no code, confirmation, identity rejection, repeat suppression and native selection outcome; preserve the existing generic non-BOM warning.
 - Confirm identity using two independent valid frames. Conflicting, unmatched and error results are not evidence of absence.
+- A qualified request survives a later brief empty frame. Log its target-correlated native receipt without replacing the latest no-code diagnostic.
+- While a different code waits for confirmation, reselect must not act on the previous code instead of the displayed target.
 - Suppress repeated selection while a confirmed code remains visible. Rearm after at least one second **and** two fresh empty frames, or explicit camera Start/device restart.
 - Do not permanently mark failed/unconfirmed selection as seen; allow bounded retries without a tight retry loop.
 - Check state transitions, copy fallback, manual priority, stale results, full-set selection and resource release before declaring the release validated. See [diagnostics specification](scan-diagnostics.md).

@@ -38,6 +38,15 @@ export interface NativeSelectionAdapter {
   dispose(): void;
 }
 
+// Bounded in-memory plain text only; never camera frames or automatic uploads.
+export interface ScanTextOutput {
+  frameCount: number;
+  lastFrameAt?: string;
+  status: 'waiting' | 'no-code' | 'confirming' | 'suppressed' | 'rejected' | 'matching' | 'selected' | 'error' | 'stopped';
+  message: string;
+  text: string;
+}
+
 export interface ScannerViewModel {
   phase: 'idle' | 'starting' | 'scanning' | 'matching' | 'selected' | 'rejected' | 'error' | 'stopped';
   message: string;
@@ -49,6 +58,7 @@ export interface ScannerViewModel {
   cameraDevices?: readonly { deviceId: string; label: string }[];
   selectedCameraId?: string;
   canReselect?: boolean;
+  scanText?: ScanTextOutput;
 }
 
 export interface ScannerActions {

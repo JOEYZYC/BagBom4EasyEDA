@@ -8,7 +8,7 @@ This is an independent browser enhancement—not a client extension, official AP
 
 ## Status
 
-The **0.1.0 baseline** was verified and pushed without force. **0.2.0 is a development target pending final release validation**: bounded plaintext scan diagnostics, copying with a manual fallback, and same-code rearming. Baseline verification does not establish that these development features have passed. See [diagnostics](docs/scan-diagnostics.md) and the [verification record](docs/verification.md).
+**0.2.0 has passed local software verification**, including bounded plaintext scan diagnostics, copying with a manual fallback, and same-code rearming. Physical-label recognition and camera permissions still require testing on your own setup. See [diagnostics](docs/scan-diagnostics.md) and the [verification record](docs/verification.md).
 
 ## Use locally built files
 
@@ -31,7 +31,7 @@ More: [usage](docs/usage.md) · [documentation index](docs/README.md).
 - Reject mixed, conflicting, incomplete or missing identities, hidden targets and unsupported multi-row selections rather than select a subset. A previous highlight may remain after rejection; it is not a new success.
 - Preserve the original single-click behavior, including any original centering or side flip. Do not promise client integration, progress synchronization or new progress persistence.
 - The enhancer reads input as data without executing it. **The generated file still contains the executable vendor viewer: use only trusted exports.** Compatibility is limited to the supplied export family, not all V4 exports.
-- Scanning and decoding are local. The 0.2.0 diagnostics target keeps bounded plaintext in memory, not images, uploaded logs or persistent scan history. Wrinkles, reflections and occlusion can still prevent decoding.
+- Scanning and decoding are local. Diagnostics keep bounded plaintext in memory, not images, uploaded logs or persistent scan history. Wrinkles, reflections and occlusion can still prevent decoding.
 
 ## Development
 

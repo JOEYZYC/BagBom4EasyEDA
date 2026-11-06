@@ -1,4 +1,5 @@
 import test from 'node:test';
+import './session-diagnostics.test.ts';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -117,12 +118,13 @@ test('DOM contract rejects unknown/mixed/subset/wrong-side rows; supports synthe
   assert.equal(verifyRow({...row,mode:'single'},target,s),false);
   assert.equal(verifyRow({...row,cCode:'C259000'},target,s),false);
 });
-test('generation aborts old work; scan latch requires stable frames and never steals repeated identity',()=>{
+test('generation aborts old work; presence latch suppresses continuous code but explicit restart rearms',()=>{
   const latest=new LatestInput(),a=latest.next(),b=latest.next();
   assert.equal(a.signal.aborted,true);assert.equal(latest.current(a.generation),false);assert.equal(latest.current(b.generation),true);
-  const latch=new ScanLatch();assert.equal(latch.observe('C25900'),false);assert.equal(latch.observe('C25900'),true);
-  latest.next(); latch.resetStability();assert.equal(latch.observe('C25900'),false);assert.equal(latch.observe('C25900'),false);
-  assert.equal(latch.observe('C11111'),false);assert.equal(latch.observe('C11111'),true);
+  const latch=new ScanLatch();assert.equal(latch.observe('C25900',0).kind,'confirming');const attempt=latch.observe('C25900',100);
+  assert.equal(attempt.kind,'select');if(attempt.kind==='select')latch.finish(attempt.attempt,true,200);
+  latest.next();latch.resetStability();assert.equal(latch.observe('C25900',300).kind,'suppressed');
+  latch.restart();assert.equal(latch.observe('C25900',400).kind,'confirming');assert.equal(latch.observe('C25900',500).kind,'select');
 });
 test('adapter target/artifact tokens, abort and full-set guards fail before any DOM access',async()=>{
   let valid=true;

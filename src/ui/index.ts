@@ -3,6 +3,7 @@ import type {
   EnhancerViewModel,
   ScannerActions,
   ScannerViewModel,
+  ScanTextOutput,
   ViewHandle,
 } from '../contracts.ts';
 
@@ -135,6 +136,18 @@ const scannerStyles = `
   .preview { aspect-ratio: 16 / 9; overflow: hidden; position: relative; background: #182b2e; border-radius: 9px; border: 1px solid #294348; }
   .preview video { display: block; width: 100%; height: 100%; object-fit: cover; }
   .preview-label { position: absolute; left: 9px; bottom: 7px; font-size: 12px; color: #fff; background: #172d30eb; padding: 2px 7px; border-radius: 4px; pointer-events: none; }
+  .scan-output { margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f7faf7; }
+  .scan-output h3 { font-size: 13px; font-weight: 650; }
+  .scan-output .row { align-items: center; }
+  .scan-output button { min-width: 44px; padding: 7px 9px; font-size: 12px; }
+  .scan-output-status { margin-top: 4px; font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+  .scan-output[data-status="rejected"] .scan-output-status, .scan-output[data-status="error"] .scan-output-status { color: var(--error); }
+  .scan-meta { margin-top: 3px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+  .scan-message { margin-top: 4px; max-height: 64px; overflow-y: auto; white-space: pre-wrap; }
+  .scan-text { display: block; width: 100%; min-width: 0; height: 78px; margin-top: 8px; padding: 8px; border: 1px solid #7b8e85; border-radius: 6px; background: var(--surface); color: var(--ink); font: 12px/1.6 "Cascadia Mono", "Consolas", "Microsoft YaHei", monospace; resize: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .scan-text[data-expanded="true"] { height: 180px; }
+  .scan-text:focus-visible { outline: 3px solid #b15a17; outline-offset: 3px; }
+  .copy-feedback { margin-top: 5px; }
   .camera-fields { margin-top: 10px; }
   .camera-fields label { font-size: 12px; }
   .start { width: 100%; margin-top: 8px; }
@@ -156,6 +169,12 @@ const scannerStyles = `
 const scannerPhase: Record<ScannerViewModel['phase'], string> = {
   idle: '等待扫码', starting: '正在开启摄像头', scanning: '正在扫码',
   matching: '正在匹配', selected: '定位结果', rejected: '未能匹配', error: '操作未完成', stopped: '已停止扫码',
+};
+
+const scanTextStatus: Record<ScanTextOutput['status'], string> = {
+  waiting: '等待扫码输出', 'no-code': '未解码到二维码', confirming: '已解码，等待确认',
+  suppressed: '重复内容已抑制', rejected: '已解码，内容未通过校验', matching: '已解码，正在匹配',
+  selected: '原生定位结果', error: '扫码输出异常', stopped: '扫码处理已停止',
 };
 
 export function mountScanner(
@@ -195,6 +214,48 @@ export function mountScanner(
   const previewSlot = el('div', undefined, 'preview');
   previewSlot.setAttribute('aria-label', '摄像头预览');
   previewSlot.append(preview, el('span', '摄像头预览', 'preview-label'));
+  const scanOutput = el('section', undefined, 'scan-output');
+  scanOutput.dataset.testid = 'scan-output';
+  scanOutput.setAttribute('aria-labelledby', 'scanner-scan-title');
+  const scanHeading = el('div', undefined, 'row');
+  const scanTitle = el('h3', '扫码文本', 'grow');
+  scanTitle.id = 'scanner-scan-title';
+  const expandText = button('展开', 'scan-text-toggle');
+  expandText.setAttribute('aria-label', '展开扫码文本区域');
+  expandText.setAttribute('aria-controls', 'scanner-scan-text');
+  expandText.setAttribute('aria-expanded', 'false');
+  const copyText = button('复制', 'copy-scan-text');
+  copyText.setAttribute('aria-label', '复制扫码文本');
+  scanHeading.append(scanTitle, expandText, copyText);
+  const scanState = el('div');
+  scanState.setAttribute('role', 'status');
+  scanState.setAttribute('aria-live', 'polite');
+  scanState.setAttribute('aria-atomic', 'true');
+  const scanStateTitle = el('p', undefined, 'scan-output-status');
+  scanStateTitle.dataset.testid = 'scan-output-status';
+  const scanMessage = el('p', undefined, 'small break scan-message');
+  scanMessage.id = 'scanner-scan-message';
+  scanMessage.dataset.testid = 'scan-output-message';
+  scanState.append(scanStateTitle, scanMessage);
+  // Frame counts are deliberately outside the live region to avoid an
+  // announcement on every processed frame while a user inspects the text.
+  const scanMeta = el('p', undefined, 'scan-meta');
+  scanMeta.dataset.testid = 'scan-frame-info';
+  const scanText = el('textarea', undefined, 'scan-text');
+  scanText.id = 'scanner-scan-text';
+  scanText.dataset.testid = 'scan-text';
+  scanText.readOnly = true;
+  scanText.rows = 3;
+  scanText.spellcheck = false;
+  scanText.setAttribute('aria-label', '扫码文本（只读）');
+  scanText.setAttribute('aria-describedby', 'scanner-scan-message scanner-scan-hint');
+  scanText.placeholder = '尚无解码文本';
+  const scanHint = el('p', '可选择文字复制；仅保留本次会话的文本。', 'small muted');
+  scanHint.id = 'scanner-scan-hint';
+  const copyFeedback = el('p', undefined, 'small muted break copy-feedback');
+  copyFeedback.dataset.testid = 'scan-copy-feedback';
+  copyFeedback.setAttribute('role', 'status');
+  scanOutput.append(scanHeading, scanState, scanMeta, scanText, scanHint, copyFeedback);
   const cameraFields = el('div', undefined, 'camera-fields');
   const deviceLabel = el('label', '摄像头');
   deviceLabel.htmlFor = 'scanner-device';
@@ -205,7 +266,7 @@ export function mountScanner(
   start.classList.add('start');
   const cameraHint = el('p', '仅点击后申请权限；切换设备后需再次点击开启。', 'small muted');
   cameraFields.append(deviceLabel, device, start, cameraHint);
-  cameraSection.append(previewSlot, cameraFields);
+  cameraSection.append(previewSlot, scanOutput, cameraFields);
 
   const form = el('form', undefined, 'manual');
   form.dataset.testid = 'manual-form';
@@ -267,6 +328,9 @@ export function mountScanner(
   let localDeviceId = '';
   let deviceSignature = '';
   let userChangedDevice = false;
+  let displayedScanText: string | undefined;
+  let copyPending = false;
+  let textExpanded = false;
   on(fold, 'click', () => {
     collapsed = !collapsed;
     content.hidden = collapsed;
@@ -285,6 +349,34 @@ export function mountScanner(
     if (input.value.trim() && !submit.disabled) actions.submitManualCCode(input.value);
   });
   on(reselect, 'click', () => { if (model.canReselect) actions.reselect(); });
+  on(expandText, 'click', () => {
+    textExpanded = !textExpanded;
+    scanText.dataset.expanded = String(textExpanded);
+    expandText.textContent = textExpanded ? '缩小' : '展开';
+    expandText.setAttribute('aria-label', textExpanded ? '缩小扫码文本区域' : '展开扫码文本区域');
+    expandText.setAttribute('aria-expanded', String(textExpanded));
+  });
+  on(copyText, 'click', async () => {
+    if (!model.scanText || !scanText.value || copyPending) return;
+    const text = scanText.value;
+    copyPending = true;
+    copyText.disabled = true;
+    try {
+      const clipboard = root.ownerDocument.defaultView?.navigator.clipboard;
+      if (!clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await clipboard.writeText(text);
+      if (!ui.destroyed) copyFeedback.textContent = '已复制点击时的文本。';
+    } catch {
+      if (!ui.destroyed) {
+        scanText.focus();
+        scanText.select();
+        copyFeedback.textContent = '已选中文本，请按 Ctrl+C / ⌘C，或长按复制。';
+      }
+    } finally {
+      copyPending = false;
+      if (!ui.destroyed) copyText.disabled = !model.scanText?.text;
+    }
+  });
 
   function render(next: ScannerViewModel) {
     if (ui.destroyed) return;
@@ -299,21 +391,22 @@ export function mountScanner(
       if (next.phase === 'stopped' || next.phase === 'idle') cameraMayBeActive = false;
     }
     cameraState.dataset.active = String(cameraMayBeActive);
-    cameraText.textContent = active === true ? '摄像头正在使用'
+    let cameraLabel = active === true ? '摄像头正在使用'
       : next.phase === 'starting' ? '正在请求摄像头'
       : active === false ? (next.phase === 'stopped' ? '摄像头已停止' : '摄像头未开启')
       : cameraMayBeActive ? '摄像头可能仍开启'
       : next.phase === 'idle' ? '摄像头尚未请求'
       : next.phase === 'stopped' ? '摄像头已停止'
       : '摄像头状态请查看浏览器';
-    if (active === undefined && next.phase === 'scanning') cameraText.textContent = '摄像头正在使用';
+    if (active === undefined && next.phase === 'scanning') cameraLabel = '摄像头正在使用';
+    if (cameraText.textContent !== cameraLabel) cameraText.textContent = cameraLabel;
     start.disabled = next.phase === 'starting';
     start.textContent = next.phase === 'starting' ? '正在开启…' : '开启摄像头扫码';
     device.disabled = next.phase === 'starting';
     submit.disabled = next.phase === 'matching';
-    statusTitle.textContent = scannerPhase[next.phase];
+    if (statusTitle.textContent !== scannerPhase[next.phase]) statusTitle.textContent = scannerPhase[next.phase];
     foldSummary.textContent = scannerPhase[next.phase];
-    message.textContent = next.message;
+    if (message.textContent !== next.message) message.textContent = next.message;
     status.dataset.error = String(next.phase === 'error' || next.phase === 'rejected');
     warning.hidden = !next.previousHighlightMayRemain;
     result.hidden = !next.cCode && !next.designators.length;
@@ -321,6 +414,26 @@ export function mountScanner(
     count.textContent = next.designators.length ? `匹配位号 · ${next.designators.length} 个` : '暂无匹配位号';
     designators.replaceChildren(...next.designators.map(value => el('li', value)));
     reselect.disabled = !next.canReselect;
+
+    const output = next.scanText;
+    scanOutput.hidden = !output;
+    if (output) {
+      scanOutput.dataset.status = output.status;
+      const title = scanTextStatus[output.status];
+      if (scanStateTitle.textContent !== title) scanStateTitle.textContent = title;
+      if (scanMessage.textContent !== output.message) scanMessage.textContent = output.message;
+      scanMeta.textContent = `已处理 ${output.frameCount} 帧${output.lastFrameAt ? ` · 最近帧：${output.lastFrameAt}` : ''}`;
+    }
+    const text = output?.text;
+    // Compare the source string, not textarea.value (which normalizes CRLF).
+    // Never replace identical text: live counters must not reset selection,
+    // caret, scroll, or keyboard focus while the user is inspecting a payload.
+    if (text !== displayedScanText) {
+      scanText.value = text || '';
+      displayedScanText = text;
+      copyFeedback.textContent = '';
+    }
+    copyText.disabled = copyPending || !text;
 
     const devices = next.cameraDevices || [];
     const signature = JSON.stringify(devices);

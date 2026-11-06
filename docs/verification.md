@@ -2,11 +2,11 @@
 
 ## Release boundary
 
-**v0.1.0 is the verified baseline**, subsequently pushed with its source/tag without force. The results below belong to that baseline, not to the current **0.2.0 development target**.
+**0.2.0 passed local software verification on 2026-11-06**, including plaintext diagnostics, same-code rearming and rebuilt HTML. This is not a claim of physical-camera performance or successful remote publication.
 
-**0.2.0 core and UI integration remain pending.** No final pass, newly verified generated output or release readiness is established here for plaintext diagnostics or revised same-code rearming. Update this record only after actual affected checks, integration and rebuilding. See [development requirements](implementation-plan.md) and [scan diagnostics](scan-diagnostics.md).
+The earlier v0.1.0 baseline had 32 unit/contract tests, 9 generated-viewer checks and 4 lifecycle refinements, and its source/tag was pushed without force. The current results below were established for 0.2.0 rather than inferred from that baseline. See [development requirements](implementation-plan.md) and [scan diagnostics](scan-diagnostics.md).
 
-## Baseline configuration and evidence types
+## Configuration and evidence types
 
 - Recorded runtime: **Node 24.22.2**, **pnpm 11.18.0**; dependencies fixed by the project lockfile.
 - Read-only bag-bom reference: <https://github.com/egethropic/bag-bom>, public commit `1fc1e0b2abd8b023ba01e6000c4110d72d94860c`.
@@ -15,27 +15,40 @@
 
 Source inspection, deterministic tests, generated-viewer execution and synthetic-media execution are distinct evidence types. None alone establishes physical-label recognition. Private specimen identities, filenames, fingerprints, reference mappings and image artifacts are not reproduced in this public record.
 
-## VERIFIED — recorded v0.1.0 software results
+## VERIFIED — 0.2.0 software results
 
 | Check | Recorded result and scope |
 | --- | --- |
 | Type checking | `pnpm typecheck` completed successfully. |
-| Unit/contract tests | **32/32 passed**, including **14 camera lifecycle/scheduling tests**. Coverage included exact identity/conflict handling, stale sessions, row adaptation, source preservation and all four output-target alias checks. |
-| Focused UI checks | Previously passing scanner/enhancer UI evidence was reused where UI/contracts were unchanged. This is not evidence for the new 0.2.0 UI. |
-| Local build | Completed successfully for the baseline; original input preservation was checked. This does not establish any new 0.2.0 output. |
-| Derived-viewer browser checks | **9 checks passed** on the generated viewer in isolated browser automation with network blocking. |
+| Unit/contract tests | **48/48 passed**, including **14 camera lifecycle/scheduling tests** and **16 repeat-state/text tests**. Exact identity/conflict handling, stale sessions, row adaptation, source preservation and all four output-target alias checks remain covered. |
+| Focused UI checks | `pnpm test:ui` passed for scanner/enhancer actions, nine diagnostic states, literal hostile text, selection/scroll stability, copy success and unavailable/denied fallback, responsive bounds and cleanup. This evidence remains valid through the final controller-only fix because UI/contracts did not change. |
+| Local build | The reusable enhancer and enhanced viewer were rebuilt; original input preservation was checked. Generated notices contain the full project MIT license and applicable upstream license/NOTICE text. |
+| Derived-viewer browser checks | **13 checks passed** on the generated viewer in isolated browser automation with network blocking and no page errors. |
 | Lifecycle refinements | **4 checks passed**, covering active-media state, Stop cleanup and cancellation of a pending original selection callback. |
-| Synthetic-media integration | Synthetic video frames passed through the **actual inline Worker/WASM decoder to the original viewer**. This was not merely an injected decoder result. |
+| Synthetic-media integration | Synthetic video frames passed through the **actual inline Worker/WASM decoder to the original viewer**. A separate media check confirmed distinct frames, one job in flight and cleanup, with zero physical-camera calls. No successful decode or native receipt was fabricated. |
+| Independent source review | Diagnostic/state changes were reviewed. A reselect/display-target mismatch was reproduced on the old build, corrected and covered by the final browser checks; the focused source recheck found it resolved. Source review is not runtime evidence. |
 
 ### Original viewer and safety invariants
 
-**VERIFIED — baseline generated-viewer runtime checks:** exact-identity selection was compared with original manual row single-click behavior. The complete aggregated target set and original viewer response agreed; unsupported multi-reference selection in non-aggregated mode and hidden targets were rejected rather than partially selected.
+**VERIFIED — generated-viewer runtime checks:** exact-identity selection was compared with original manual row single-click behavior. The complete aggregated target set, observed native selection/centering calls and engine-canvas image agreed; unsupported multi-reference selection in non-aggregated mode and hidden targets were rejected rather than partially selected.
 
 Original manual interaction took priority and cancelled a pending automatic selection callback. This establishes cancellation in the tested pending-callback case, not reversal of an already executed native selection. Soldered checkbox state remained unchanged; the enhancement did not substitute checkbox, double-click or modifier-key actions for the original single-click.
 
-**VERIFIED — baseline build/download and isolated-browser checks:** original source preservation, local enhancement/download/reopening, embedded Worker/WASM operation, offline execution and blocking of tested background network requests were checked. These are observed results for the tested export family, not a universal security or compatibility guarantee.
+**VERIFIED — build/download and isolated-browser checks:** original source preservation, local enhancement/download/reopening, embedded Worker/WASM operation, offline execution and blocking of tested background network requests were checked. Protected inputs and the pinned reference remained unchanged. These are observed results for the tested export family, not a universal security or compatibility guarantee.
 
 **VERIFIED — synthetic lifecycle checks:** independent frames were used for confirmation; only one decoding task was in flight, and stop/page lifecycle cleanup released synthetic media resources. Permission/UI and physical device behavior were not thereby tested.
+
+### Diagnostics and repeat-state regressions
+
+**VERIFIED — deterministic tests and generated-viewer synthetic-media checks:**
+
+- Raw text, confirmation, rejection and repeat suppression remain distinct; counters advance even when identical text is coalesced. Hostile payloads remain literal, and display truncation never changes matching input. The existing generic non-BOM main warning is unchanged.
+- Continuous confirmed codes do not repeatedly select. At least two fresh empty decoded frames spanning one second rearm the same code; explicit Start also rearms it. Conflicting/unmatched payloads do not count as absence. Failed attempts do not permanently poison eligibility.
+- Exactly two actual decoded valid frames followed by an empty decoded frame before the native callback still select the qualified target. Its receipt is target-correlated while the latest no-code diagnostic remains unchanged.
+- Confirmed target A followed by one actual decoded frame of B displays B but disables reselect. A forced UI click leaves native selection, soldered checks and the live synthetic stream unchanged; a second B confirmation cannot mask this test boundary.
+- Native manual action still stops scanning, and no implicit resumption occurs. Stop/page lifecycle cleanup and stale-receipt guards remain effective.
+
+The final controller fix justified repeating type/unit/build/generated-viewer/refinement checks. Unchanged UI and separate camera-media evidence was reused rather than rerun without a cause. Private runtime reports stay in ignored local test artifacts, not public documentation.
 
 ## Performance evidence boundary
 
@@ -48,7 +61,6 @@ Prior synthetic benchmarking retained complete expected results for **40/40** me
 - New export versions, blanket V4 compatibility, other browser/layout families and all real-world label/format combinations.
 - Soldering-progress save/reopen behavior and client synchronization. No new persistence is promised.
 - Public redistribution permission for vendor viewer code, board data and models. The project's MIT license does not grant these rights.
-- Final 0.2.0 core/UI integration, diagnostics/copy fallback, repeat rearming, rebuilt outputs and affected regression results.
 
 ## Reproducing checks
 

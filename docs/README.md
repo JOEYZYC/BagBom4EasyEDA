@@ -5,7 +5,7 @@
 ## Using the tool
 
 - [Local usage](usage.md): native export, local enhancement, manual verification and camera controls.
-- [Scan diagnostics](scan-diagnostics.md): 0.2.0 development behavior, pending final release validation.
+- [Scan diagnostics](scan-diagnostics.md): tested 0.2.0 plaintext output and same-code rearming.
 - [Capture and performance limits](scanner-performance.md): software constraints and synthetic-evidence limits.
 
 ## Design and provenance
@@ -24,4 +24,4 @@
 - [Execution contract](execution-contract.md): project execution scope.
 - [MIT license](../LICENSE) and [third-party notices](../THIRD_PARTY_NOTICES.md): original project terms do not grant vendor-viewer, board or model rights.
 
-The verified 0.1.0 baseline is distinct from the pending 0.2.0 development target. Generated HTML and private native exports are not supplied by the source repository.
+0.2.0 has passed local software verification, not physical-camera validation. Generated HTML and private native exports are not supplied by the source repository.
