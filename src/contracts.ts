@@ -62,7 +62,6 @@ export interface ScannerViewModel {
 }
 
 export interface ScannerActions {
-  submitManualCCode(value: string): void;
   startCamera(deviceId?: string): void;
   stopCamera(): void;
   reselect(): void;

@@ -7,6 +7,7 @@ This document describes the current export-enhancement design, not a client-exte
 - **0.1.0:** verified baseline, pushed without force.
 - **0.2.0:** local software verification completed for plaintext diagnostics, same-code rearming and rebuilt HTML. This is not a physical-camera or remote-publication claim; see the current verification record.
 - **0.2.1:** Apache-2.0 packaging/version-metadata patch using the verified runtime; distribute only the standalone enhancer and license/notice files, not vendor-viewer or board exports.
+- **0.3.0:** native-aligned UI, one stateful camera control, preview-first layout and removal of the duplicate manual C-code form. Exact matching, original manual priority and capture/decoder settings are retained. Software verification is recorded separately from remote publication.
 
 ## Architecture
 

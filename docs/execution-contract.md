@@ -35,13 +35,50 @@ Replace session-lifetime repeat prohibition with presence-based rearming: suppre
 
 Core/UI integration, rebuilding and affected software checks have now been reconciled for 0.2.0; their actual results and physical-use limits are recorded in [verification](verification.md). That local evidence does not establish remote publication. Preserve these validation gates for later changes. See [diagnostics](scan-diagnostics.md).
 
+## Native-aligned UI redesign
+
+The user requests a UI and interaction redesign that is at least consistent with
+the original viewer's style. This authorizes local presentation changes to the
+scanner panel and standalone generator, with focused tests and regenerated local
+outputs. Publication was initially outside that UI-only scope; subsequent user
+authorization is recorded below.
+
+Use the trusted generated viewer as the visual reference in isolated software-only
+checks; keep original exports and reference sources unchanged. Preserve Shadow DOM
+isolation and access to the native toolbar, BOM and viewer. Retain explicit camera
+Start, visible active-camera state and Stop when folded, manual priority, accurate
+native-selection outcomes, safe raw-text/copy fallback, and the unchanged generic
+non-BOM warning. No scanner algorithm, identity rule, media ownership, progress
+persistence or soldered-state behavior changes are part of this redesign.
+
+The subsequent user refinement consolidates Start and Stop into one stateful
+camera control, removes the enhancement's duplicate C-code form, and places the
+active preview first in the expanded sidebar content. Manual search/selection
+continues through the original viewer. Removing the obsolete form action and
+updating affected guidance and regression-test entry points is in scope; adding
+production test hooks or weakening selection/cancellation checks is not. Camera
+restart is explicit Stop followed by Start, not an additional simultaneous action.
+
+Verification ownership: the UI implementation lane checks presentation callbacks,
+disclosures, keyboard/focus behavior, contrast and narrow/short viewport bounds.
+After reconciling the UI changes, integration verification checks the rebuilt
+generator and enhanced viewer, original-source preservation and the existing
+generated-viewer regressions. Screenshots and private runtime evidence remain
+local and untracked. These planned checks are not completed verification evidence.
+
 ## Publication and repository authorization
 
 The user requested **Apache-2.0 licensing for original project code/docs**, superseding the earlier project-license choice, while retaining professional de-identified documentation and **bilingual README files with English as the default**, linked reciprocally. Retain upstream attribution, copyright, license and modification notices. Generated assets must embed the full root Apache-2.0 LICENSE and project NOTICE alongside complete applicable upstream notices, without relicensing third-party/vendor material. The license-change rebuild and notice verification are separate from the recorded 0.2.0 software results.
 
 Remove absolute machine/install/user paths, personal information, private board/sample filenames, specimen fingerprints, board-content identifiers and internal operational transcripts from public Markdown. Use generic repository-relative examples such as `input/board.html`. Documentation redaction does not erase older Git history; history rewriting requires separate explicit authorization.
 
-The user now authorizes **GitHub Release publication** at <https://github.com/JOEYZYC/BagBom4EasyEDA>. Use a new `v0.2.1` patch tag and matching package metadata for the Apache-2.0 packaging release; preserve the historical MIT `v0.2.0` tag and all existing history. Authorized operations include the reviewed source/version commit, non-forced main/tag push, draft creation, attachment verification and publication.
+The user now authorizes **pushing the current UI changes and publishing a GitHub
+Release** at <https://github.com/JOEYZYC/BagBom4EasyEDA>. Use a new `v0.3.0` tag and
+matching package metadata for the native-aligned UI and interaction update.
+Preserve `v0.2.1`, the historical MIT `v0.2.0` tag and all existing history.
+Authorized operations include the reviewed source/version commit, non-forced
+main/tag push, draft creation, attachment verification and publication. This
+release does not change capture resolution, frame scheduling or decoder settings.
 
 The exact attachment allowlist is `html-enhancer.html`, `LICENSE`, `NOTICE` and `THIRD_PARTY_NOTICES.txt`. The tool must contain no vendor viewer, private export or board data; never attach a generated board/viewer HTML, input, screenshot or runtime payload. Verify uploaded asset identity and publication status. Check ambiguous mutation outcomes before retrying; do not overwrite remote history or change credentials/global configuration.
 

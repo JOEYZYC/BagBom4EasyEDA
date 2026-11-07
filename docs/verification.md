@@ -74,6 +74,75 @@ Only license metadata, notice packaging and documentation changed; unchanged typ
 
 For `v0.2.1`, release preparation changes package version and public documentation, not scanner algorithms or notice inputs. A fresh build reproduced the exact validated Apache-2.0 tool and notices hashes, so the unchanged runtime evidence was reused. Verify the remote tag, attachment allowlist, uploaded sizes/digests and final publication state separately. Never attach these assets to the historical MIT `v0.2.0` tag.
 
+## VERIFIED — local native-aligned UI redesign (2026-11-07)
+
+The local redesign changes presentation and UI checks, not scanner algorithms,
+identity/selection rules or media ownership. It is packaged for v0.3.0; the older
+v0.2.1 download does not contain it. Local verification does not itself establish
+remote publication.
+
+The results immediately below record the first local UI iteration. The subsequent
+single-control/preview-first refinement has its own revalidation record below.
+
+- `pnpm test:ui --screenshots` and `pnpm typecheck` exited **0**. Focused UI checks
+  cover result-first reading order, optional diagnostics/help, retained disclosure
+  state, keyboard access, raw-text/copy safety, active-camera Stop and folded
+  warnings. Six viewport sizes passed horizontal-overflow and top-clearance checks;
+  Stop remained at least 44px high.
+- Isolated comparison with the trusted generated viewer established the observed
+  neutral/blue visual language and unchanged native document geometry. These
+  comparison states were synthetic presentation models, not native-selection
+  evidence. A floating panel still obscures part of the viewer when expanded.
+- After reconciling the UI changes, `pnpm build` and `pnpm test:browser` exited
+  **0**. All **13 generated-viewer checks** passed, including actual synthetic
+  decoding/native selection, original checkbox preservation, cancellation,
+  manual priority, repeat behavior and local generation/download/reopening.
+- Original HTML inputs retained their pre-build hashes. A focused isolated-browser
+  notice check exited **0** and found all eight complete project/upstream
+  license/NOTICE texts in both rebuilt output disclosures. Browser checks reported
+  no external requests, page errors or physical-camera requests.
+
+Private screenshots and runtime reports remain local and ignored. This is software
+and observed-layout evidence, not validation of real cameras, screen-reader output
+or every export/window layout. The unchanged core-only unit evidence above was
+reused; no fresh full-suite or physical-label performance claim is made.
+
+### VERIFIED — single camera control and preview-first refinement
+
+The follow-up removes the duplicate custom C-code form/action, retaining native
+search and row selection. One fixed camera control offers Start, Cancel during
+startup, or Stop according to rendered state. Active preview comes first in the
+expanded content, ahead of settings, warnings and results. Device changes require
+Stop followed by an explicit Start. Scanner algorithms and media ownership remain
+unchanged; camera fallback guidance now points to the original viewer.
+
+- `pnpm test:ui --screenshots` exited **0**. Assertions and inspected screenshots
+  cover one action across inactive, starting, active-result and folded states,
+  cancellation routing, no custom form, preview DOM/visual order, retained
+  raw-text/copy safety, keyboard access and six viewport sizes. These UI states
+  use synthetic models, not physical cameras.
+- After both writer scopes were reconciled, `pnpm typecheck`, `pnpm test`,
+  `pnpm build`, `pnpm test:browser`, and the browser refinement mode all exited
+  **0**: **48 unit/contract tests**, **13 generated-viewer checks**, and
+  **4 refinement checks** passed. Former custom-form regression entry points now
+  use intercepted software video through the actual Worker/WASM decoder; no
+  removed feature was revived through production test hooks. Native row-click
+  equivalence, checkbox preservation, callback cancellation, rearming and original
+  manual priority remained verified in those tested scenarios.
+- Original input hashes remained unchanged. The focused notice audit exited
+  **0**, finding all eight full license/NOTICE texts in both rebuilt files.
+  Browser reports contained no page errors or external requests. Mock media
+  requests are not physical-camera access; no physical camera was used.
+
+The rebuilt generator and enhanced viewer contain this refinement, prepared for
+v0.3.0. Real permission prompts, physical-label performance and universal
+export/layout compatibility remain outside this evidence. Release preparation
+changes version metadata and documentation only. A fresh release build reproduced
+the exact previously validated generator and notices, so the relevant software
+evidence was reused. Verify the
+remote source tag, exact attachment allowlist, uploaded sizes/digests and final
+publication state separately.
+
 ## Reproducing checks
 
 Prepare the [pinned reference/dependencies](reference-status.md) and a trusted compatible native export separately. Generic build example:

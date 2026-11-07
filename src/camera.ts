@@ -40,7 +40,7 @@ export class LocalCamera {
     const epoch = this.epoch;
     this.callbacks.state('starting', '仅在本地处理。请允许浏览器使用摄像头', false);
     try {
-      if (!this.media?.getUserMedia) throw new Error('此上下文不支持摄像头；请使用现代浏览器，或继续手动输入');
+      if (!this.media?.getUserMedia) throw new Error('此上下文不支持摄像头；请使用现代浏览器，或使用原生 BOM 搜索与手动选择');
       const stream = await this.media.getUserMedia({audio: false, video: {
         width: {ideal: 1920}, height: {ideal: 1080}, frameRate: {ideal: 30},
         ...(deviceId ? {deviceId: {exact: deviceId}} : {facingMode: {ideal: 'environment'}}),
@@ -152,7 +152,7 @@ export class LocalCamera {
   }
   private fail(text: string, epoch: number): void {
     if (epoch !== this.epoch) return;
-    this.stop(); this.callbacks.state('error', `${text}。相机已释放，可继续手动输入`, false);
+    this.stop(); this.callbacks.state('error', `${text}。相机已释放，可使用原生 BOM 搜索与手动选择`, false);
   }
 }
 function message(error: unknown): string {

@@ -1,6 +1,6 @@
 import {mountScanner} from './ui/index.ts';
 import {DOMSelectionAdapter, ownedEvents} from './selection.ts';
-import {manualMatch, type BoardSnapshot} from './native.ts';
+import type {BoardSnapshot} from './native.ts';
 import {matchFrame, type BarcodeAPI} from './identity.ts';
 import {LatestInput, ScanLatch} from './session.ts';
 import {ScanTextLog} from './scan-text.ts';
@@ -36,7 +36,7 @@ async function main() {
   let lastTarget: ExactTarget | undefined;
   const root = document.createElement('div'); root.id = 'bagbom-scanner'; document.body.append(root);
   const preview = document.createElement('video');
-  let model: ScannerViewModel = {phase: 'idle', message: '先手动输入完整 C 编号验证定位；摄像头仅在点击开启后申请', designators: [], previousHighlightMayRemain: false, cameraActive: false, scanText: scanText.snapshot()};
+  let model: ScannerViewModel = {phase: 'idle', message: '点击开启摄像头扫码；也可使用原生 BOM 搜索与手动选择', designators: [], previousHighlightMayRemain: false, cameraActive: false, scanText: scanText.snapshot()};
   const update = (patch: Partial<ScannerViewModel>) => { model = {...model, ...patch, scanText: scanText.snapshot()}; view.render(model); };
   const camera = new LocalCamera(preview, navigator.mediaDevices, createDecoderWorker, {
     generation: () => latest.generation,
@@ -75,7 +75,7 @@ async function main() {
         update({phase: 'matching', message: matchingMessage});
       } else if (decision.kind === 'suppressed') {
         lastTarget = result.target;
-        const message = '同一码仍在画面中，已抑制重复定位；移开至少1秒并取得两个无代码新帧，或点击开启摄像头重新识别';
+        const message = '同一码仍在画面中，已抑制重复定位；移开至少1秒并取得两个无代码新帧，或先停止再开启摄像头重新识别';
         scanText.frame(payloads, 'suppressed', message);
         update({phase: 'selected', message, cCode: result.target.cCode, designators: result.target.designators, previousHighlightMayRemain: false, canReselect: true});
       } else {
@@ -117,7 +117,6 @@ async function main() {
     }
   }
   const view = mountScanner(root, {
-    submitManualCCode: value => {camera.stop('手动输入优先，扫码已暂停'); void apply(manualMatch(value, snapshot), scanText.event('matching', '手动输入定位请求（非相机解码）'));},
     startCamera: deviceId => {
       if (!validArtifact()) {
         camera.stop(); const message = '原生数据已改变，请重新打开增强文件';

@@ -21,6 +21,8 @@ await mkdir('tests/.generated',{recursive:true});
 await prepareZXingModule({overrides:{wasmBinary:await readFile('node_modules/zxing-wasm/dist/writer/zxing_writer.wasm')},fireImmediately:true});
 const qr=await writeBarcode('C25900',{format:'QRCode',scale:8});assert.ok(qr.image);
 const png=Buffer.from(await qr.image.arrayBuffer()).toString('base64');
+const otherQR=await writeBarcode('C2935915',{format:'QRCode',scale:8});assert.ok(otherQR.image);
+const otherPNG=Buffer.from(await otherQR.image.arrayBuffer()).toString('base64');
 const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
 const contexts=[];
 async function pageFor(path,syntheticPNG,twoFramesOnly=false,pauseOnPayload) {
@@ -84,7 +86,34 @@ async function pageFor(path,syntheticPNG,twoFramesOnly=false,pauseOnPayload) {
 }
 async function ready(page) {
   await page.locator('#founded > tbody > tr').first().waitFor();
-  await page.getByTestId('manual-code').waitFor();await page.waitForTimeout(1500);
+  await page.getByTestId('camera-toggle').waitFor();
+  assert.equal(await page.getByTestId('camera-toggle').count(),1);
+  for(const id of ['manual-form','manual-code','manual-submit','start-camera','stop-camera'])assert.equal(await page.getByTestId(id).count(),0,`${id} must not survive the simplified UI`);
+  await page.waitForFunction(()=>typeof window._MSG_BUS_?.rpcCall==='function'&&[...document.querySelectorAll('canvas')].some(canvas=>canvas.width>300&&canvas.height>300));
+  await page.waitForTimeout(1500); // Preserve native viewer startup settling for pixel comparisons.
+}
+async function startCamera(page) {
+  assert.equal(await page.getByTestId('camera-state').getAttribute('data-active'),'false','Start requires an observed inactive camera');
+  const requests=await page.evaluate(()=>window.__cameraRequests);
+  await page.getByTestId('camera-toggle').click();
+  await page.waitForFunction(requests=>{
+    const shadow=document.querySelector('[data-testid="scanner-host"]').shadowRoot;
+    return window.__cameraRequests===requests+1&&window.__syntheticStream?.getTracks().every(track=>track.readyState==='live')&&shadow.querySelector('[data-testid="camera-state"]').dataset.active==='true'&&shadow.querySelector('[data-testid="camera-toggle"]').textContent.includes('停止');
+  },requests);
+  assert.match(await page.getByTestId('camera-toggle').innerText(),/停止/);
+}
+async function stopCamera(page) {
+  assert.equal(await page.getByTestId('camera-state').getAttribute('data-active'),'true','Stop requires an observed active camera');
+  await page.getByTestId('camera-toggle').click();
+  await page.waitForFunction(()=>window.__syntheticStream.getTracks().every(track=>track.readyState==='ended')&&document.querySelector('[data-testid="scanner-host"]').shadowRoot.querySelector('[data-testid="camera-state"]').dataset.active==='false');
+  assert.match(await page.getByTestId('camera-toggle').innerText(),/开启/);
+}
+async function waitScannerMessage(page,text) {
+  const observed=await page.waitForFunction(text=>{
+    const message=document.querySelector('[data-testid="scanner-host"]')?.shadowRoot?.querySelector('[data-testid="scanner-status"]')?.textContent;
+    return message?.includes(text)&&message;
+  },text);
+  return observed.jsonValue();
 }
 async function waitNativeSelected(page) {
   await page.waitForFunction(()=>{
@@ -141,7 +170,7 @@ async function boardImage(page,path) {
   return hash(image);
 }
 async function verifyDispatchCancellation(page) {
-  const previous=(await selectionState(page)).rows;
+  const previous=await selectionState(page);
   await page.evaluate(()=>{
     window.__trace=[];window.__dispatchProof={clicks:0,dblclicks:0,at:0,modifiers:[]};
     const observe=event=>{
@@ -151,8 +180,9 @@ async function verifyDispatchCancellation(page) {
       else window.__dispatchProof.dblclicks++;
     };
     document.addEventListener('click',observe,true);document.addEventListener('dblclick',observe,true);
+    document.addEventListener('pointerdown',()=>{window.__dispatchProof.invalidatedAt=performance.now();},{capture:true,once:true});
   });
-  await page.getByTestId('manual-code').fill('C2935915');await page.getByTestId('manual-submit').click();
+  await setSyntheticCodes(page,[otherPNG]);
   await page.waitForFunction(()=>window.__dispatchProof.clicks===1);
   assert.match(await page.getByTestId('scanner-status').innerText(),/正在核对/);
   const elapsed=await page.evaluate(()=>performance.now()-window.__dispatchProof.at);
@@ -160,9 +190,12 @@ async function verifyDispatchCancellation(page) {
   await page.locator('#founded > tbody > tr').first().dispatchEvent('pointerdown');
   await page.waitForTimeout(500);
   const after=await selectionState(page),proof=await page.evaluate(()=>window.__dispatchProof);
+  assert.ok(proof.invalidatedAt-proof.at<300,'actual native-priority invalidation must precede the 300ms callback');
   assert.equal(after.trace.length,0,'observed dispatch must not produce a late native engine selection');
   assert.equal((await scanOutput(page)).status,'stopped','cancelled receipt must not overwrite newer stopped diagnostics');
-  assert.deepEqual(after.rows,previous);assert.equal(proof.clicks,1);assert.equal(proof.dblclicks,0);
+  assert.deepEqual(after.rows,previous.rows);assert.deepEqual(after.checkboxes,previous.checkboxes);
+  assert.equal(await page.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'ended');
+  assert.equal(proof.clicks,1);assert.equal(proof.dblclicks,0);
   assert.deepEqual(proof.modifiers,[[false,false,false,false]]);
   report.native.push({postDispatchCancellation:{...proof,elapsedBeforeInvalidation:elapsed,selectionCalls:0,previousRowsPreserved:true}});
   report.checks.push('observed exactly one unmodified click, then invalidated before 300ms: pending native callback canceled, no dblclick or late engine selection');
@@ -173,7 +206,7 @@ async function verifyTwoFrameQualification(page) {
     const bus=window._MSG_BUS_,original=bus.rpcCall;window.__qualifiedNativeAt=undefined;
     bus.rpcCall=function(...args){if(args[0]==='/engine/camera/setTarget')window.__qualifiedNativeAt=performance.now();return original.apply(this,args);};
   });
-  await page.getByTestId('start-camera').click();
+  await startCamera(page);
   await page.waitForFunction(()=>document.querySelector('[data-testid="scanner-host"]').shadowRoot.querySelector('[data-testid="scan-text"]').value.includes('selected: 此前两帧目标 C25900'));
   const evidence=await page.evaluate(()=>({results:window.__limitedDecoderResults,nativeAt:window.__qualifiedNativeAt}));
   const decoded=evidence.results.filter(result=>result.texts.length),empty=evidence.results.find(result=>!result.texts.length);
@@ -183,15 +216,14 @@ async function verifyTwoFrameQualification(page) {
   const output=await scanOutput(page);assert.equal(output.status,'no-code','native receipt cannot replace the latest truthful empty-frame diagnostic');
   assert.ok(output.text.includes('此前两帧目标 C25900'));
   const after=await selectionState(page);assert.deepEqual(after.rows,['R1、R2、R4']);assert.deepEqual(after.checkboxes,before);
-  await page.getByTestId('stop-camera').click();assert.equal(await page.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'ended');
+  await stopCamera(page);
   report.native.push({twoFramesThenBlank:{decodedFrames:decoded.length,firstEmptyAt:empty.at,nativeAt:evidence.nativeAt,latestStatus:output.status,rows:after.rows}});
   report.checks.push('exactly two real decoded frames then blank before native delay still select the qualified target; latest no-code text stays truthful and receipt is target-correlated');
 }
 async function verifyReselectTarget(page) {
-  await page.getByTestId('start-camera').click();await waitNativeSelected(page);await waitScanStatus(page,'suppressed');
+  await startCamera(page);await waitNativeSelected(page);await waitScanStatus(page,'suppressed');
   const before=await selectionState(page);
-  const other=await writeBarcode('C2935915',{format:'QRCode',scale:8});
-  await setSyntheticCodes(page,[Buffer.from(await other.image.arrayBuffer()).toString('base64')]);
+  await setSyntheticCodes(page,[otherPNG]);
   await page.waitForFunction(()=>window.__pauseVideoFrames===true&&document.querySelector('[data-testid="scanner-host"]').shadowRoot.querySelector('[data-testid="scan-output"]').dataset.status==='confirming');
   assert.equal(await page.getByTestId('selected-code').innerText(),'C2935915');
   assert.equal(await page.getByTestId('designators').innerText(),'H2');
@@ -200,7 +232,7 @@ async function verifyReselectTarget(page) {
   const after=await selectionState(page);assert.deepEqual(after.rows,before.rows);assert.deepEqual(after.trace,before.trace);assert.deepEqual(after.checkboxes,before.checkboxes);
   assert.equal(await page.evaluate(()=>window.__limitedDecoderResults.filter(result=>result.texts.includes('C2935915')).length),1);
   assert.equal(await page.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'live');
-  await page.getByTestId('stop-camera').click();
+  await stopCamera(page);
   report.checks.push('confirmed A then one actual decoded B frame: displayed B cannot reselect old A, and no native selection or media stop is triggered');
 }
 async function verifyDiagnosticsAndRearm(page) {
@@ -208,7 +240,7 @@ async function verifyDiagnosticsAndRearm(page) {
     if(!event.isTrusted&&event.target instanceof HTMLTableRowElement&&event.target.closest('#smt-ui-container'))window.__scanClicks++;
   },true);});
   const clicks=()=>page.evaluate(()=>window.__scanClicks);
-  await page.getByTestId('start-camera').click();await waitNativeSelected(page);await waitScanStatus(page,'suppressed');
+  await startCamera(page);await waitNativeSelected(page);await waitScanStatus(page,'suppressed');
   assert.deepEqual((await selectionState(page)).rows,['R1、R2、R4']);
   const first=await scanOutput(page),firstClicks=await clicks();assert.equal(firstClicks,1);
   assert.ok(first.text.includes('C25900')&&first.text.includes('confirming:')&&first.text.includes('selected:'));
@@ -232,8 +264,7 @@ async function verifyDiagnosticsAndRearm(page) {
   assert.equal((await scanOutput(page)).message,'同帧包含未解析/未匹配身份，请一次只展示一个料袋','existing non-BOM wording unchanged');
   await page.waitForTimeout(1200);await setSyntheticCodes(page,[png]);await waitScanStatus(page,'suppressed');assert.equal(await clicks(),firstClicks,'unmatched text is not absence');
 
-  const other=await writeBarcode('C2935915',{format:'QRCode',scale:8});
-  await setSyntheticCodes(page,[png,Buffer.from(await other.image.arrayBuffer()).toString('base64')]);await waitScanStatus(page,'rejected');
+  await setSyntheticCodes(page,[png,otherPNG]);await waitScanStatus(page,'rejected');
   const conflicting=await scanOutput(page);assert.ok(conflicting.text.includes('C25900')&&conflicting.text.includes('C2935915'));
   await page.waitForTimeout(1200);await setSyntheticCodes(page,[png]);await waitScanStatus(page,'suppressed');assert.equal(await clicks(),firstClicks,'conflicting symbols are not absence');
   report.checks.push('scanText raw/confirmation/suppression/rejection, advancing frame counters, coalescing and literal hostile text; unmatched/conflicting payloads never rearm');
@@ -246,17 +277,17 @@ async function verifyDiagnosticsAndRearm(page) {
   },empty.frames);
   assert.equal(await clicks(),firstClicks);assert.ok((await scanOutput(page)).text.includes('本帧没有解码文本'));
   await setSyntheticCodes(page,[png]);await waitNativeSelected(page);assert.equal(await clicks(),firstClicks+1,'same code reselects after >=1s and fresh empty frames');
-  await page.getByTestId('stop-camera').click();assert.equal(await page.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'ended');
-  await page.getByTestId('start-camera').click();await waitNativeSelected(page);assert.equal(await clicks(),firstClicks+2,'explicit Start rearms the same code');
+  await stopCamera(page);
+  await startCamera(page);await waitNativeSelected(page);assert.equal(await clicks(),firstClicks+2,'explicit Start rearms the same code');
   report.checks.push('empty-frame absence >=1s and explicit Stop/Start both rearm the same code, with normal two-frame confirmation');
 
   await page.locator('#founded > tbody > tr').first().click({position:{x:110,y:14}});await page.waitForTimeout(550);
   assert.equal(await page.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'ended');assert.deepEqual((await selectionState(page)).rows,['H2']);
   const paused=await scanOutput(page);await page.waitForTimeout(350);assert.equal((await scanOutput(page)).frames,paused.frames);assert.equal((await scanOutput(page)).status,'stopped');
   assert.equal(await clicks(),firstClicks+2,'native manual action must not implicitly resume camera');
-  await page.getByTestId('start-camera').click();await waitNativeSelected(page);assert.equal(await clicks(),firstClicks+3);assert.deepEqual((await selectionState(page)).rows,['R1、R2、R4']);
+  await startCamera(page);await waitNativeSelected(page);assert.equal(await clicks(),firstClicks+3);assert.deepEqual((await selectionState(page)).rows,['R1、R2、R4']);
   await page.getByTestId('reselect').click();await waitNativeSelected(page);assert.equal(await page.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'ended');
-  await page.getByTestId('start-camera').click();await page.waitForTimeout(300);await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));
+  await startCamera(page);await waitNativeSelected(page);await page.evaluate(()=>window.dispatchEvent(new Event('pagehide')));
   assert.equal(await page.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'ended');
   report.checks.push('native manual pause remains authoritative; only explicit Start resumes/rearms; manual reselect and pagehide still release media');
 }
@@ -264,23 +295,23 @@ try {
   if(reselectRegression){
     const page=await pageFor(enhanced,png,false,'C2935915');await ready(page);await trace(page);await verifyReselectTarget(page);
   }else if(refinement){
-    const page=await pageFor(enhanced);await ready(page);await trace(page);
-    await page.getByTestId('manual-code').fill('C25900');await page.getByTestId('manual-submit').click();
+    const page=await pageFor(enhanced,png);await ready(page);await trace(page);
+    await startCamera(page);
     await waitNativeSelected(page);
     await verifyDispatchCancellation(page);
     const synthetic=await pageFor(enhanced,png);await ready(synthetic);
-    await synthetic.getByTestId('start-camera').click();
+    await startCamera(synthetic);
     await waitNativeSelected(synthetic);
     assert.equal(await synthetic.getByTestId('camera-state').getAttribute('data-active'),'true');
     assert.equal(await synthetic.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'live');
     const unknown=await writeBarcode('C999999',{format:'QRCode',scale:8});
     const unknownPNG=Buffer.from(await unknown.image.arrayBuffer()).toString('base64');
-    await synthetic.evaluate(async png=>{const image=new Image();image.src='data:image/png;base64,'+png;await image.decode();
-      const canvas=window.__syntheticCanvas;canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);},unknownPNG);
+    await setSyntheticCodes(synthetic,[unknownPNG]);
     await synthetic.waitForFunction(()=>document.querySelector('[data-testid="scanner-host"]')?.shadowRoot?.querySelector('[data-testid="scanner-status"]')?.textContent?.includes('同帧包含未解析/未匹配身份'));
     assert.equal(await synthetic.getByTestId('camera-state').getAttribute('data-active'),'true');
     assert.equal(await synthetic.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'live');
-    await synthetic.getByTestId('stop-camera').click();
+    assert.match(await synthetic.getByTestId('camera-toggle').innerText(),/停止/);
+    await stopCamera(synthetic);
     assert.equal(await synthetic.getByTestId('camera-state').getAttribute('data-active'),'false');
     assert.equal(await synthetic.evaluate(()=>window.__syntheticStream.getTracks()[0].readyState),'ended');
     report.checks.push('cameraActive true in selected and rejected phases with a live synthetic stream; false after Stop');
@@ -299,33 +330,42 @@ try {
   const manualImage=await boardImage(baseline,'tests/.generated/native-manual.png');
   assert.notEqual(manualImage,imageBefore,'engine image must change after original native selection');
 
-  const adapted=await pageFor(enhanced);await ready(adapted);await trace(adapted);
-  await adapted.getByTestId('manual-code').fill('C25900');await adapted.getByTestId('manual-submit').click();
+  const adapted=await pageFor(enhanced,png);await ready(adapted);await trace(adapted);
+  await startCamera(adapted);
   await waitNativeSelected(adapted);
   const automatic=await selectionState(adapted);assert.deepEqual(automatic.rows,manual.rows);assert.deepEqual(automatic.checkboxes,checkboxesBefore);
   assert.deepEqual(automatic.trace,manual.trace,'same native selection/model-highlight/centering call sequence, no guessed RPC');
   const adaptedImage=await boardImage(adapted,'tests/.generated/native-adapter.png');
   assert.equal(adaptedImage,manualImage,'actual engine canvas is identical to native user single-click baseline');
-  assert.equal(automatic.cameraRequests,0);
+  assert.equal(manual.cameraRequests,0,'native baseline never requests even a mock stream');
+  assert.equal(automatic.cameraRequests,1,'software scan requests exactly one intercepted mock stream, never physical hardware');
   report.native.push({code:'C25900',refs:['R1','R2','R4'],manual,adapter:automatic,engineImagesIdentical:true});
-  report.checks.push('actual aggregate multi-reference manual->adapter native row, engine trace and pixel-identical engine canvas; welded checks unchanged');
+  report.checks.push('actual aggregate multi-reference native click vs software scan adapter: identical row, full engine trace and pixels; welded checks unchanged; one intercepted mock stream only');
 
   await verifyDispatchCancellation(adapted);
 
   await adapted.getByRole('button',{name:'位号不聚合',exact:true}).click();
-  await adapted.getByTestId('manual-code').fill('C25900');await adapted.getByTestId('manual-submit').click();
-  await adapted.waitForTimeout(200);
-  assert.match(await adapted.getByTestId('scanner-status').innerText(),/不聚合多位号不支持/);
-  await adapted.getByTestId('manual-code').fill('C2935915');await adapted.getByTestId('manual-submit').click();
-  await adapted.waitForTimeout(650);
-  assert.match(await adapted.getByTestId('scanner-status').innerText(),/已确认原生 BOM 行选中/);
+  const nonaggregateBefore=await selectionState(adapted);
+  await startCamera(adapted);
+  assert.match(await waitScannerMessage(adapted,'不聚合多位号不支持'),/不聚合多位号不支持/);
+  const refused=await selectionState(adapted);assert.deepEqual(refused.trace,nonaggregateBefore.trace);assert.deepEqual(refused.checkboxes,nonaggregateBefore.checkboxes);
+  await setSyntheticCodes(adapted,[otherPNG]);await waitNativeSelected(adapted);
+  assert.equal(await adapted.getByTestId('selected-code').innerText(),'C2935915');
+  assert.equal(await adapted.getByTestId('designators').innerText(),'H2');
+  assert.deepEqual(await adapted.locator('#smt-ui-container table > tbody > tr').evaluateAll(rows=>rows.filter(row=>row.getClientRects().length&&getComputedStyle(row).visibility!=='hidden'&&row.style.backgroundColor==='rgb(230, 247, 255)').map(row=>row.cells[1]?.textContent)),['H2']);
+  const single=await selectionState(adapted);assert.deepEqual(single.checkboxes,nonaggregateBefore.checkboxes);assert.ok(single.trace.length>refused.trace.length);
+  await stopCamera(adapted);
   report.checks.push('actual nonaggregate single-reference selection; nonaggregate multi-reference rejected (no last-only fake success)');
 
   await adapted.getByRole('button',{name:'位号聚合',exact:true}).click();
   const search=adapted.locator('#smt-ui-container input[type="text"]').first();await search.fill('NO-SUCH-PART');
-  await adapted.getByTestId('manual-code').fill('C25900');await adapted.getByTestId('manual-submit').click();await adapted.waitForTimeout(180);
-  assert.match(await adapted.getByTestId('scanner-status').innerText(),/未找到唯一/);
+  await adapted.waitForFunction(()=>![...document.querySelectorAll('#founded > tbody > tr')].some(row=>row.cells[6]?.textContent?.trim()==='C25900'&&row.getClientRects().length));
+  const filteredBefore=await selectionState(adapted);
+  await startCamera(adapted);
+  assert.match(await waitScannerMessage(adapted,'未找到唯一'),/未找到唯一/);
   assert.equal(await adapted.getByTestId('previous-highlight-warning').isVisible(),true);
+  const filteredAfter=await selectionState(adapted);assert.deepEqual(filteredAfter.trace,filteredBefore.trace);assert.deepEqual(filteredAfter.checkboxes,filteredBefore.checkboxes);assert.deepEqual(filteredAfter.rows,filteredBefore.rows);
+  await stopCamera(adapted);
   report.checks.push('filtered/hidden native target refused with honest previous-highlight warning');
 
   // End-to-end SOFTWARE media stream: canvas -> video -> actual Worker/WASM -> native viewer.
@@ -375,7 +415,7 @@ try {
   }
   assert.deepEqual(report.network,[],'document CSP must block inherited background network before interception');
   report.checks.push('document-level CSP blocks inherited font/favicon/API requests; no runtime external resources');
-  assert.equal(hash(await readFile(source)),before);report.checks.push('original SHA256 preserved; no real-camera requests');
+  assert.equal(hash(await readFile(source)),before);report.checks.push('original SHA256 preserved; cameraRequests counts intercepted software mocks only, never physical camera calls');
   assert.deepEqual(report.errors,[]);
   report.result='PASS';
 }catch(error){report.result='FAIL';report.failure=error.stack;throw error;}

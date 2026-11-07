@@ -6,11 +6,11 @@
 
 In LCEDA PCB, choose **Tools → Soldering Assistance → Export → Offline HTML** (`工具 → 焊接辅助工具 → 导出 → 离线Html`). Keep the trusted original untouched; `input/board.html` is a generic example filename, not a supplied board.
 
-Download [html-enhancer.html from v0.2.1](https://github.com/JOEYZYC/BagBom4EasyEDA/releases/download/v0.2.1/html-enhancer.html), or use a locally built `output/html-enhancer.html`. The tool contains no vendor viewer or board data. Generated HTML is not included in a source checkout. Developers can follow the [build instructions](../README.md#development); end users need no Node.js, server or CDN.
+Download [html-enhancer.html from v0.3.0](https://github.com/JOEYZYC/BagBom4EasyEDA/releases/download/v0.3.0/html-enhancer.html), or use a locally built `output/html-enhancer.html`. The tool contains no vendor viewer or board data. Generated HTML is not included in a source checkout. Developers can follow the [build instructions](../README.md#development); end users need no Node.js, server or CDN.
 
 ## 2. Generate a new enhanced file
 
-1. Open `output/html-enhancer.html` in desktop Chrome or Edge.
+1. Open the downloaded `html-enhancer.html` (or locally built `output/html-enhancer.html`) in desktop Chrome or Edge.
 2. Select the trusted, untouched native HTML—not CSV, XLSX or an already enhanced file.
 3. Download the new `*_扫码版.html`, for example `output/<board>_扫码版.html`.
 4. Open that new file. Keep the original separately and do not choose its name in the browser's save dialog.
@@ -22,18 +22,30 @@ When using a new build, close old tabs and reopen the new file. Previously gener
 ## 3. Verify manual selection first
 
 1. Choose **aggregated references** (`位号聚合`) and clear search/visibility filters.
-2. Enter a complete supplier C-code from your own BOM and invoke manual location.
+2. Use the original viewer's search to find a complete supplier C-code from your
+   own BOM, then click its original BOM row and verify the full reference set.
 3. Check the selected original BOM row, **all target references** and the board response. Scanning must never auto-check “soldered” (`已焊接`).
 
 The enhancer reuses the original single-click. That click may already center or flip the view; no extra double-click is needed. Non-aggregated or multi-row targets that cannot express the complete target set are rejected rather than partially selected. Do not work around that safety check by interpreting the last of several single-clicks as a complete selection.
 
 ## 4. Start and stop scanning
 
-1. Click **Start camera** (`开启摄像头扫码`) and grant browser permission. Camera access is not requested automatically.
-2. Select a device if needed and explicitly start/restart it.
+The v0.3.0 UI places the scanner in the lower-right corner,
+using the original viewer's neutral surfaces and blue controls. The active preview
+comes first in the expanded content; results precede the optional
+**扫码原文与诊断** and **使用说明与隐私** disclosures. One camera control changes
+from Start to Stop while active and remains accessible when folded. The duplicate
+enhancement-owned C-code entry is removed; use original search and row selection.
+These presentation changes are not included in the older v0.2.1 download;
+use the v0.3.0 enhancer and regenerate your board HTML to obtain them.
+
+1. Click **Start camera** (`开启摄像头`) and grant browser permission. Camera access is not requested automatically. While permission/startup is pending, the same control can cancel the request locally; browser permission UI remains browser-controlled.
+2. To change devices, stop first, select the device and explicitly start again.
 3. Present one complete label at a time. Confirmation requires two independent valid frames with a consistent exact identity.
 4. Check the full identity, reference set and native viewer outcome before proceeding.
-5. Use **Stop camera** to release it. Folding the panel only reduces its size; it does not stop capture. Native manual interaction pauses scanning.
+5. While active, the same control offers **Stop camera** to release it. Restart
+   explicitly by stopping and starting again. Folding the panel only reduces its
+   size; it does not stop capture. Native manual interaction pauses scanning.
 
 QRCode, DataMatrix, Code128, Code39 and PDF417 are decoded locally. There is no OCR, cloud lookup or value/package guessing. Camera use from local files depends on browser/runtime policy and permission. If access is unavailable, use manual selection and normal browser permission controls; do not disable browser security.
 

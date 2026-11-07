@@ -8,18 +8,18 @@ This is an independent browser enhancement—not a client extension, official AP
 
 ## Status
 
-**v0.2.1 packages the verified scanner under Apache-2.0.** The 0.2.0 runtime passed local software verification, including bounded plaintext diagnostics, copying with a manual fallback, and same-code rearming. Physical-label recognition and camera permissions still depend on your setup. See [diagnostics](docs/scan-diagnostics.md) and the [verification record](docs/verification.md).
+**v0.3.0 updates the UI to match the original viewer:** neutral surfaces and blue controls, one Start/Stop camera button, preview-first layout and native search instead of a duplicate C-code form. Exact matching, local diagnostics and same-code rearming are retained. UI, type, unit and software-browser checks passed; physical-label recognition and camera permissions still depend on your setup. See the [verification record](docs/verification.md).
 
 ## Download and use
 
-Download [**html-enhancer.html from v0.2.1**](https://github.com/JOEYZYC/BagBom4EasyEDA/releases/download/v0.2.1/html-enhancer.html), or build it locally as described below. The source checkout does not include generated HTML. The downloadable tool contains **no vendor viewer or board data**; supply your own trusted native export.
+Download [**html-enhancer.html from v0.3.0**](https://github.com/JOEYZYC/BagBom4EasyEDA/releases/download/v0.3.0/html-enhancer.html), or build it locally as described below. The source checkout does not include generated HTML. The downloadable tool contains **no vendor viewer or board data**; supply your own trusted native export.
 
 1. In LCEDA PCB, choose **Tools → Soldering Assistance → Export → Offline HTML** (`工具 → 焊接辅助工具 → 导出 → 离线Html`).
-2. Open the locally built `output/html-enhancer.html` in desktop Chrome or Edge.
+2. Open the downloaded `html-enhancer.html` (or locally built `output/html-enhancer.html`) in desktop Chrome or Edge.
 3. Choose a **trusted, untouched native HTML export**, such as `input/board.html`—not CSV, XLSX or an already enhanced file.
 4. Download a new `*_扫码版.html` and open it. Do not overwrite the original.
-5. Use aggregated BOM mode (`位号聚合`), clear search/visibility filters, and manually verify a complete supplier C-code from your own BOM before scanning.
-6. Click **Start camera** and grant permission. Check the full matched reference set and the original viewer response.
+5. Use aggregated BOM mode (`位号聚合`), clear search/visibility filters, and verify a complete supplier C-code using the original search and BOM-row selection before scanning.
+6. Click **Start camera** (`开启摄像头`) and grant permission. The same button offers Stop while active. Check the full matched reference set and the original viewer response.
 
 Using built files needs **no Node.js, server or CDN**. Camera access from a local file depends on the browser runtime and permission; do not bypass browser security. **Stop** releases the camera; folding the panel does not stop it. Native manual interaction pauses scanning. For a new build, close old tabs and reopen the new file; regenerate other boards from their untouched originals with the new enhancer.
 
@@ -74,4 +74,4 @@ The project draws on [egethropic/bag-bom](https://github.com/egethropic/bag-bom)
 
 The project's Apache-2.0 license does **not** grant rights to the vendor viewer, board data or models. Public redistribution of the vendor viewer has not been established; do not publish generated viewer HTML.
 
-The historical `v0.2.0` tag retains its original **MIT** license snapshot; existing tags and history are not rewritten. Use `v0.2.1` for the Apache-2.0 release. The build and embedded notices were verified separately; see [verification](docs/verification.md).
+The historical `v0.2.0` tag retains its original **MIT** license snapshot; existing tags and history are not rewritten. Apache-2.0 was adopted in `v0.2.1` and is retained in `v0.3.0`. The build and embedded notices were verified separately; see [verification](docs/verification.md).

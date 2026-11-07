@@ -11,13 +11,13 @@ import type {
 // source files, opens media, controls the native viewer, or owns video tracks.
 const baseStyles = `
   :host {
-    --ink: #192f35; --muted: #52666a; --line: #d4dfdc;
-    --paper: #f5f6f1; --surface: #fff; --soft: #edf3f0;
-    --accent: #146557; --accent-hover: #0b4e43; --on-accent: #fff;
-    --warning: #734310; --warning-bg: #fff3dc;
-    --error: #a12424; --error-bg: #fff0ee;
-    font-family: "Bahnschrift", "Aptos", "PingFang SC", "Microsoft YaHei", sans-serif;
-    font-size: 14px; line-height: 1.6; color: var(--ink);
+    --ink: #262626; --muted: #595959; --line: #cecece;
+    --paper: #f1f1f1; --surface: #fff; --soft: #f5f5f5;
+    --accent: #176ac6; --accent-hover: #10549f; --on-accent: #fff;
+    --warning: #704000; --warning-bg: #fff8e6;
+    --error: #a12622; --error-bg: #fff2f0;
+    font-family: Roboto, "Microsoft YaHei", "PingFang SC", sans-serif;
+    font-size: 13px; line-height: 1.5; color: var(--ink);
     text-align: left; color-scheme: light;
   }
   *, *::before, *::after { box-sizing: border-box; }
@@ -26,31 +26,34 @@ const baseStyles = `
   button, input, select { font: inherit; color: inherit; }
   button, select { touch-action: manipulation; }
   button {
-    min-height: 44px; border: 1px solid var(--line); border-radius: 9px;
-    padding: 9px 14px; background: var(--surface); font-weight: 600;
-    cursor: pointer; transition: background-color 160ms, border-color 160ms;
+    min-height: 32px; border: 1px solid var(--line); border-radius: 2px;
+    padding: 5px 12px; background: var(--surface); font-weight: 400;
+    cursor: pointer; transition: background-color 120ms, border-color 120ms;
   }
-  button:hover:not(:disabled) { background: var(--soft); border-color: #8da8a0; }
+  button:hover:not(:disabled) { color: var(--accent); background: #f0f7ff; border-color: var(--accent); }
   button.primary { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
-  button.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
-  button:disabled { cursor: not-allowed; background: #e9edeb; color: #66716e; border-color: #d6ddda; }
-  :is(button, input, select):focus-visible { outline: 3px solid #b15a17; outline-offset: 3px; }
+  button.primary:hover:not(:disabled) { color: var(--on-accent); background: var(--accent-hover); border-color: var(--accent-hover); }
+  button:disabled { cursor: not-allowed; background: #f1f1f1; color: #666; border-color: #cecece; }
+  :is(button, input, select, summary):focus-visible { outline: 2px solid #176ac6; outline-offset: 2px; }
   input, select {
-    width: 100%; min-width: 0; min-height: 44px; padding: 9px 11px;
-    border: 1px solid #7b8e85; border-radius: 8px; background: var(--surface);
+    width: 100%; min-width: 0; min-height: 34px; padding: 6px 8px;
+    border: 1px solid #808080; border-radius: 2px; background: var(--surface);
   }
-  input::placeholder { color: #6a7876; opacity: 1; }
-  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  input::placeholder { color: #6b6b6b; opacity: 1; }
+  label { display: block; font-weight: 400; margin-bottom: 5px; }
   .muted { color: var(--muted); }
-  .small { font-size: 12px; line-height: 1.65; }
+  .small { font-size: 12px; line-height: 1.6; }
   .mono { font-family: "Cascadia Mono", "Consolas", monospace; }
   .break { overflow-wrap: anywhere; }
   .row { display: flex; align-items: center; gap: 8px; }
   .grow { flex: 1; min-width: 0; }
-  .notice { padding: 10px 12px; border: 1px solid #dfb978; border-radius: 8px; color: var(--warning); background: var(--warning-bg); }
-  .status { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--soft); border-radius: 8px; padding: 12px; }
+  .notice { padding: 7px 9px; border: 1px solid #d8b771; border-radius: 2px; color: var(--warning); background: var(--warning-bg); }
+  .status { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--soft); border-radius: 0; padding: 9px 10px; }
   .status[data-error="true"] { border-color: #e3aaa3; border-left-color: var(--error); background: var(--error-bg); color: var(--error); }
   .status-title { font-weight: 700; }
+  summary { cursor: pointer; color: var(--muted); padding: 10px 2px; min-height: 38px; }
+  summary:hover { color: var(--accent); }
+  details[open] > summary { color: var(--ink); }
   svg { flex: none; display: block; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 `;
@@ -117,58 +120,62 @@ function surface(root: HTMLElement, kind: string, css: string) {
 }
 
 const scannerStyles = `
-  :host { position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); width: min(340px, calc(100vw - 24px)); z-index: 2147483000; }
-  .panel { background: var(--surface); border: 1px solid #a5bcb2; border-radius: 14px; box-shadow: 0 12px 40px #18372c26, 0 2px 8px #18372c14; max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); max-height: min(820px, calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); display: flex; flex-direction: column; overflow: hidden; }
-  .panel-header { padding: 11px 12px 8px; flex: none; border-bottom: 1px solid var(--line); background: #f3f7f4; }
-  .heading { gap: 10px; }
-  h2 { font-size: 16px; letter-spacing: .02em; line-height: 1.4; }
-  .fold { padding: 8px 10px; min-width: 54px; font-size: 12px; }
-  .camera-bar { margin-top: 8px; justify-content: space-between; gap: 8px; }
+  :host { position: fixed; bottom: max(28px, env(safe-area-inset-bottom)); right: max(32px, env(safe-area-inset-right)); width: min(316px, calc(100vw - 24px)); z-index: 2147483000; }
+  .panel { background: var(--surface); border: 1px solid #b8b8b8; border-radius: 2px; box-shadow: 0 3px 14px #00000024; max-height: min(740px, calc(100dvh - 104px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); display: flex; flex-direction: column; overflow: hidden; }
+  .panel-header { padding: 0 10px 8px; flex: none; border-bottom: 1px solid var(--line); background: #f1f1f1; }
+  .heading { gap: 7px; min-height: 39px; border-bottom: 1px solid #ddd; }
+  .heading svg { width: 18px; height: 18px; color: var(--accent); }
+  .heading-text { display: flex; gap: 8px; align-items: baseline; }
+  h2 { font-size: 13px; font-weight: 600; line-height: 1.4; }
+  .fold { padding: 4px 8px; min-width: 44px; min-height: 32px; font-size: 12px; border-color: transparent; background: transparent; }
+  .camera-bar { margin-top: 6px; justify-content: space-between; gap: 6px; }
   .camera-state { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-  .dot { width: 7px; height: 7px; background: #75847e; border-radius: 50%; flex: none; }
-  .camera-state[data-active="true"] { color: #155345; font-weight: 600; }
-  .camera-state[data-active="true"] .dot { background: #0d7956; box-shadow: 0 0 0 3px #dceee4; }
+  .dot { width: 6px; height: 6px; background: #777; border-radius: 50%; flex: none; }
+  .camera-state[data-active="true"] { color: #704000; font-weight: 600; }
+  .camera-state[data-active="true"] .dot { background: #9a5900; }
   .panel-header .notice { margin-top: 8px; }
   .fold-summary { margin-top: 5px; }
-  .stop { min-height: 44px; padding: 6px 10px; color: #8e2525; border-color: #d8b6b0; font-size: 12px; }
-  .content { overflow-y: auto; overscroll-behavior: contain; padding: 14px; min-height: 0; }
-  .content > * + * { margin-top: 14px; }
-  .preview { aspect-ratio: 16 / 9; overflow: hidden; position: relative; background: #182b2e; border-radius: 9px; border: 1px solid #294348; }
-  .preview video { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .preview-label { position: absolute; left: 9px; bottom: 7px; font-size: 12px; color: #fff; background: #172d30eb; padding: 2px 7px; border-radius: 4px; pointer-events: none; }
-  .scan-output { margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #f7faf7; }
-  .scan-output h3 { font-size: 13px; font-weight: 650; }
+  .fold-live { color: var(--warning); margin-top: 3px; }
+  .camera-toggle { min-height: 44px; padding: 5px 8px; font-size: 12px; transition: none; flex: none; }
+  .camera-toggle[data-active="true"] { color: #fff; background: #a12622; border-color: #a12622; }
+  .camera-toggle[data-active="true"]:hover { color: #fff; background: #81211e; border-color: #81211e; }
+  .content { overflow-y: auto; overscroll-behavior: contain; padding: 12px; min-height: 0; scrollbar-width: thin; scroll-padding-block: 8px; }
+  .content > * + * { margin-top: 12px; }
+  .preview { aspect-ratio: 2.3; overflow: hidden; position: relative; background: #252525; border-radius: 0; border: 1px solid #555; }
+  .preview video { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .preview-label { position: absolute; left: 6px; bottom: 5px; font-size: 12px; color: #fff; background: #252525e6; padding: 1px 5px; pointer-events: none; }
+  .scan-output { border-top: 1px solid var(--line); }
+  .scan-output h3 { font-size: 12px; font-weight: 600; }
   .scan-output .row { align-items: center; }
-  .scan-output button { min-width: 44px; padding: 7px 9px; font-size: 12px; }
-  .scan-output-status { margin-top: 4px; font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+  .scan-output button { min-width: 44px; padding: 5px 8px; font-size: 12px; }
+  .scan-output-status { margin-top: 6px; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
   .scan-output[data-status="rejected"] .scan-output-status, .scan-output[data-status="error"] .scan-output-status { color: var(--error); }
   .scan-meta { margin-top: 3px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
   .scan-message { margin-top: 4px; max-height: 64px; overflow-y: auto; white-space: pre-wrap; }
-  .scan-text { display: block; width: 100%; min-width: 0; height: 78px; margin-top: 8px; padding: 8px; border: 1px solid #7b8e85; border-radius: 6px; background: var(--surface); color: var(--ink); font: 12px/1.6 "Cascadia Mono", "Consolas", "Microsoft YaHei", monospace; resize: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .scan-text { display: block; width: 100%; min-width: 0; height: 78px; margin-top: 8px; padding: 8px; border: 1px solid #808080; border-radius: 2px; background: var(--surface); color: var(--ink); font: 12px/1.6 "Cascadia Mono", "Consolas", "Microsoft YaHei", monospace; resize: none; white-space: pre-wrap; overflow-wrap: anywhere; }
   .scan-text[data-expanded="true"] { height: 180px; }
-  .scan-text:focus-visible { outline: 3px solid #b15a17; outline-offset: 3px; }
+  .scan-text:focus-visible { outline: 2px solid #176ac6; outline-offset: 2px; }
   .copy-feedback { margin-top: 5px; }
-  .camera-fields { margin-top: 10px; }
-  .camera-fields label { font-size: 12px; }
-  .start { width: 100%; margin-top: 8px; }
-  .manual { border-top: 1px solid var(--line); padding-top: 14px; }
-  .manual label { font-size: 13px; }
-  .manual .row { margin-top: 7px; align-items: stretch; }
-  .manual input { width: 0; flex: 1; }
-  .manual button { padding-inline: 12px; flex: none; }
-  .result { padding-top: 12px; border-top: 1px solid var(--line); }
-  .code { font-size: 20px; font-weight: 650; margin: 2px 0 8px; }
-  .designators { display: flex; flex-wrap: wrap; gap: 5px; list-style: none; padding: 0; margin: 7px 0 10px; max-height: 110px; overflow-y: auto; }
-  .designators li { padding: 3px 7px; border: 1px solid var(--line); background: var(--soft); border-radius: 5px; overflow-wrap: anywhere; max-width: 100%; font-size: 12px; }
+  .device-row { display: flex; align-items: center; gap: 8px; }
+  .camera-fields label { font-size: 12px; margin: 0; flex: none; }
+  .camera-fields select { flex: 1; min-height: 30px; padding-block: 3px; font-size: 12px; }
+  .camera-hint { margin-top: 5px; }
+  .preview[hidden] + .camera-fields { margin-top: 0; }
+  .result { padding: 9px 10px; border: 1px solid var(--line); border-top: 0; margin-top: 0; }
+  .code { font-size: 19px; font-weight: 600; margin: 2px 0 4px; }
+  .designators { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; padding: 0; margin: 6px 0 9px; max-height: 100px; overflow-y: auto; }
+  .designators li { padding: 2px 6px; border: 1px solid var(--line); background: var(--soft); border-radius: 0; overflow-wrap: anywhere; max-width: 100%; font-size: 12px; }
   .reselect { width: 100%; }
-  .footnote { padding-top: 12px; border-top: 1px solid var(--line); }
-  @media (max-height: 540px) { .preview { aspect-ratio: 2.5; } }
-  @media (max-width: 380px) { :host { top: 8px; right: 8px; width: calc(100vw - 16px); } .content { padding: 12px; } }
+  .help { border-top: 1px solid var(--line); margin-top: 0; }
+  .help p + p { margin-top: 6px; }
+  @media (max-height: 540px) { .preview { aspect-ratio: 3; } }
+  @media (max-width: 800px) { :host { right: max(12px, env(safe-area-inset-right)); } }
+  @media (pointer: coarse), (max-width: 480px) { button, input, select, .camera-fields select, .fold, summary { min-height: 44px; } }
 `;
 
 const scannerPhase: Record<ScannerViewModel['phase'], string> = {
   idle: '等待扫码', starting: '正在开启摄像头', scanning: '正在扫码',
-  matching: '正在匹配', selected: '定位结果', rejected: '未能匹配', error: '操作未完成', stopped: '已停止扫码',
+  matching: '正在匹配', selected: '定位结果', rejected: '未完成定位', error: '操作未完成', stopped: '已停止扫码',
 };
 
 const scanTextStatus: Record<ScanTextOutput['status'], string> = {
@@ -188,8 +195,8 @@ export function mountScanner(
   panel.setAttribute('aria-label', 'BOM 扫码定位');
   const header = el('header', undefined, 'panel-header');
   const heading = el('div', undefined, 'row heading');
-  const headingText = el('div', undefined, 'grow');
-  headingText.append(el('h2', '扫码定位'), el('p', '原生 BOM · 本地辅助', 'small muted'));
+  const headingText = el('div', undefined, 'grow heading-text');
+  headingText.append(el('h2', '扫码定位'), el('span', '本地辅助', 'small muted'));
   const fold = button('收起', 'scanner-toggle');
   fold.className = 'fold';
   fold.setAttribute('aria-expanded', 'true');
@@ -203,20 +210,25 @@ export function mountScanner(
   dot.setAttribute('aria-hidden', 'true');
   const cameraText = el('span', '摄像头尚未请求');
   cameraState.append(dot, cameraText);
-  const stop = button('停止摄像头', 'stop-camera');
-  stop.className = 'stop';
-  cameraBar.append(cameraState, stop);
+  const cameraToggle = button('开启摄像头', 'camera-toggle', true);
+  cameraToggle.classList.add('camera-toggle');
+  cameraBar.append(cameraState, cameraToggle);
   header.append(heading, cameraBar);
 
   const content = el('div', undefined, 'content');
   content.id = 'scanner-content';
-  const cameraSection = el('div');
   const previewSlot = el('div', undefined, 'preview');
+  previewSlot.dataset.testid = 'camera-preview';
   previewSlot.setAttribute('aria-label', '摄像头预览');
   previewSlot.append(preview, el('span', '摄像头预览', 'preview-label'));
   const scanOutput = el('section', undefined, 'scan-output');
   scanOutput.dataset.testid = 'scan-output';
   scanOutput.setAttribute('aria-labelledby', 'scanner-scan-title');
+  const scanDetails = el('details');
+  scanDetails.dataset.testid = 'scan-details';
+  const scanSummary = el('summary', '扫码原文与诊断');
+  scanSummary.dataset.testid = 'scan-details-toggle';
+  scanDetails.append(scanSummary);
   const scanHeading = el('div', undefined, 'row');
   const scanTitle = el('h3', '扫码文本', 'grow');
   scanTitle.id = 'scanner-scan-title';
@@ -255,40 +267,19 @@ export function mountScanner(
   const copyFeedback = el('p', undefined, 'small muted break copy-feedback');
   copyFeedback.dataset.testid = 'scan-copy-feedback';
   copyFeedback.setAttribute('role', 'status');
-  scanOutput.append(scanHeading, scanState, scanMeta, scanText, scanHint, copyFeedback);
+  scanDetails.append(scanHeading, scanState, scanMeta, scanText, scanHint, copyFeedback);
+  scanOutput.append(scanDetails);
   const cameraFields = el('div', undefined, 'camera-fields');
+  cameraFields.dataset.testid = 'camera-settings';
   const deviceLabel = el('label', '摄像头');
   deviceLabel.htmlFor = 'scanner-device';
   const device = el('select');
   device.id = 'scanner-device';
   device.dataset.testid = 'camera-device';
-  const start = button('开启摄像头扫码', 'start-camera', true);
-  start.classList.add('start');
-  const cameraHint = el('p', '仅点击后申请权限；切换设备后需再次点击开启。', 'small muted');
-  cameraFields.append(deviceLabel, device, start, cameraHint);
-  cameraSection.append(previewSlot, scanOutput, cameraFields);
-
-  const form = el('form', undefined, 'manual');
-  form.dataset.testid = 'manual-form';
-  const codeLabel = el('label', '或输入完整 C 编号');
-  codeLabel.htmlFor = 'scanner-code';
-  const inputRow = el('div', undefined, 'row');
-  const input = el('input', undefined, 'mono');
-  input.id = 'scanner-code';
-  input.name = 'cCode';
-  input.type = 'text';
-  input.placeholder = '例如 C123456';
-  input.autocomplete = 'off';
-  input.spellcheck = false;
-  input.setAttribute('autocapitalize', 'characters');
-  input.setAttribute('aria-describedby', 'scanner-code-hint');
-  input.dataset.testid = 'manual-code';
-  const submit = button('定位', 'manual-submit', true);
-  submit.type = 'submit';
-  const codeHint = el('p', '支持扫码枪输入；不会自动勾选已焊接。', 'small muted');
-  codeHint.id = 'scanner-code-hint';
-  inputRow.append(input, submit);
-  form.append(codeLabel, inputRow, codeHint);
+  const deviceRow = el('div', undefined, 'device-row');
+  deviceRow.append(deviceLabel, device);
+  const cameraHint = el('p', undefined, 'small muted camera-hint');
+  cameraFields.append(deviceRow, cameraHint);
 
   const status = el('div', undefined, 'status');
   status.setAttribute('role', 'status');
@@ -304,10 +295,13 @@ export function mountScanner(
   const foldSummary = el('p', undefined, 'small muted fold-summary');
   foldSummary.hidden = true;
   foldSummary.dataset.testid = 'scanner-summary';
-  header.append(foldSummary, warning);
+  const foldLive = el('p', '收起不会停止摄像头；请点击“停止摄像头”结束。', 'small fold-live');
+  foldLive.dataset.testid = 'folded-camera-warning';
+  foldLive.hidden = true;
+  header.append(foldSummary, foldLive);
   const result = el('div', undefined, 'result');
   result.dataset.testid = 'scanner-result';
-  const resultLabel = el('p', '本次编号', 'small muted');
+  const resultLabel = el('p', '本次匹配编号', 'small muted');
   const code = el('p', undefined, 'code mono break');
   code.dataset.testid = 'selected-code';
   const count = el('p', undefined, 'small muted');
@@ -317,8 +311,15 @@ export function mountScanner(
   const reselect = button('重新定位本次结果', 'reselect');
   reselect.className = 'reselect';
   result.append(resultLabel, code, count, designators, reselect);
-  const footnote = el('p', '仅在本地处理扫码内容。不自动标记焊接，原有勾选仍由你手动管理。收起面板不会停止摄像头。', 'small muted footnote');
-  content.append(cameraSection, form, status, result, footnote);
+  const help = el('details', undefined, 'help');
+  help.dataset.testid = 'scanner-help';
+  help.append(
+    el('summary', '使用说明与隐私'),
+    el('p', '仅点击开启后申请摄像头权限。收起面板不会停止摄像头；操作原生 BOM 或视图会暂停扫码，需点击开启才会恢复。', 'small muted'),
+    el('p', '无需扫码时，可直接使用原生搜索和 BOM 表格手动选择。', 'small muted'),
+    el('p', '仅在本地处理扫码内容，不保存图像。不自动标记焊接，原有勾选仍由你手动管理。请核对位号后焊接。', 'small muted'),
+  );
+  content.append(previewSlot, cameraFields, warning, status, result, scanOutput, help);
   panel.append(header, content);
   ui.shadow.append(panel);
 
@@ -331,22 +332,36 @@ export function mountScanner(
   let displayedScanText: string | undefined;
   let copyPending = false;
   let textExpanded = false;
+  // Chromium does not consistently reveal a previously selected, read-only
+  // textarea on keyboard focus inside a short shadow panel. Scroll only our
+  // content region, never the original viewer or the payload's own scroll.
+  on(content, 'focusin', event => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const box = target.getBoundingClientRect();
+    const viewport = content.getBoundingClientRect();
+    if (box.top < viewport.top + 6) content.scrollTop -= viewport.top + 6 - box.top;
+    else if (box.bottom > viewport.bottom - 6) content.scrollTop += box.bottom - viewport.bottom + 6;
+  });
   on(fold, 'click', () => {
     collapsed = !collapsed;
     content.hidden = collapsed;
     foldSummary.hidden = !collapsed;
     fold.textContent = collapsed ? '展开' : '收起';
     fold.setAttribute('aria-expanded', String(!collapsed));
+    foldLive.hidden = !collapsed || !cameraMayBeActive;
+    // Only folded safety information belongs above the preview. Keep the
+    // existing warning visible in either layout without duplicating it.
+    if (collapsed) header.append(warning);
+    else content.insertBefore(warning, status);
   });
   on(device, 'change', () => {
     localDeviceId = device.value;
     userChangedDevice = true;
   });
-  on(start, 'click', () => actions.startCamera(device.value || undefined));
-  on(stop, 'click', () => actions.stopCamera());
-  on(form, 'submit', (event) => {
-    event.preventDefault();
-    if (input.value.trim() && !submit.disabled) actions.submitManualCCode(input.value);
+  on(cameraToggle, 'click', () => {
+    if (model.phase === 'starting' || cameraMayBeActive) actions.stopCamera();
+    else actions.startCamera(device.value || undefined);
   });
   on(reselect, 'click', () => { if (model.canReselect) actions.reselect(); });
   on(expandText, 'click', () => {
@@ -387,10 +402,14 @@ export function mountScanner(
       ? next.cameraActive : undefined;
     if (typeof active === 'boolean') cameraMayBeActive = active;
     else {
-      if (next.phase === 'starting' || next.phase === 'scanning') cameraMayBeActive = true;
-      if (next.phase === 'stopped' || next.phase === 'idle') cameraMayBeActive = false;
+      if (next.phase === 'scanning') cameraMayBeActive = true;
+      if (next.phase === 'starting' || next.phase === 'stopped' || next.phase === 'idle') cameraMayBeActive = false;
     }
     cameraState.dataset.active = String(cameraMayBeActive);
+    cameraToggle.dataset.active = String(cameraMayBeActive);
+    cameraToggle.classList.toggle('primary', !cameraMayBeActive && next.phase !== 'starting');
+    foldLive.hidden = !collapsed || !cameraMayBeActive;
+    previewSlot.hidden = !cameraMayBeActive;
     let cameraLabel = active === true ? '摄像头正在使用'
       : next.phase === 'starting' ? '正在请求摄像头'
       : active === false ? (next.phase === 'stopped' ? '摄像头已停止' : '摄像头未开启')
@@ -400,10 +419,10 @@ export function mountScanner(
       : '摄像头状态请查看浏览器';
     if (active === undefined && next.phase === 'scanning') cameraLabel = '摄像头正在使用';
     if (cameraText.textContent !== cameraLabel) cameraText.textContent = cameraLabel;
-    start.disabled = next.phase === 'starting';
-    start.textContent = next.phase === 'starting' ? '正在开启…' : '开启摄像头扫码';
-    device.disabled = next.phase === 'starting';
-    submit.disabled = next.phase === 'matching';
+    cameraToggle.textContent = next.phase === 'starting' ? '取消开启' : cameraMayBeActive ? '停止摄像头' : '开启摄像头';
+    device.disabled = cameraMayBeActive || next.phase === 'starting';
+    cameraHint.textContent = next.phase === 'starting' ? '取消开启后可重新选择设备。'
+      : cameraMayBeActive ? '停止后可选择设备，再点击开启。' : '选择设备后，点击开启摄像头。';
     if (statusTitle.textContent !== scannerPhase[next.phase]) statusTitle.textContent = scannerPhase[next.phase];
     foldSummary.textContent = scannerPhase[next.phase];
     if (message.textContent !== next.message) message.textContent = next.message;
@@ -458,7 +477,7 @@ export function mountScanner(
     localDeviceId = device.value;
   }
 
-  render({ phase: 'idle', message: '开启扫码，或手动输入 C 编号进行定位。', designators: [], previousHighlightMayRemain: false });
+  render({ phase: 'idle', message: '点击开启摄像头扫码；也可使用原生搜索和 BOM 表格手动选择。', designators: [], previousHighlightMayRemain: false });
   return {
     render,
     destroy() {
@@ -472,44 +491,44 @@ export function mountScanner(
 
 const enhancerStyles = `
   :host { display: block; min-height: 100dvh; background: var(--paper); }
-  .page { min-height: 100dvh; padding: 30px 28px 24px; background-image: radial-gradient(#a9bcb33b .7px, transparent .7px); background-size: 20px 20px; }
-  .shell { max-width: 1000px; margin: 0 auto; }
-  .topbar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 23px; border-bottom: 1px solid #cbd7d0; gap: 16px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; letter-spacing: .02em; }
-  .brand-mark { background: var(--accent); color: #fff; padding: 9px; border-radius: 10px; }
-  .local { padding: 5px 10px; border: 1px solid #bfd1c5; background: #ecf3ec; border-radius: 6px; color: #31584b; font-size: 12px; white-space: nowrap; }
-  .intro { margin: 48px 0 26px; max-width: 660px; }
-  .eyebrow { color: #7d562b; font-size: 12px; font-weight: 650; letter-spacing: .12em; margin-bottom: 10px; }
-  h1 { font-size: clamp(25px, 4vw, 36px); font-weight: 650; line-height: 1.35; letter-spacing: -.025em; text-wrap: balance; }
-  .intro > p:last-child { margin-top: 14px; max-width: 580px; font-size: 15px; line-height: 1.9; color: var(--muted); }
-  .workspace { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(240px, 1fr); border: 1px solid #bccfc4; border-radius: 16px; background: var(--surface); overflow: hidden; box-shadow: 0 10px 32px #19392e08; }
-  .main { padding: 30px; min-width: 0; }
-  .section-title { font-size: 17px; line-height: 1.5; font-weight: 650; }
-  .step-index { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 1px solid #c0d4c7; border-radius: 7px; background: #edf4ee; font-size: 13px; margin-right: 9px; color: var(--accent); vertical-align: 1px; }
-  .file-area { border: 1px dashed #9cb7a9; border-radius: 11px; background: #f7faf7; padding: 30px 20px 22px; margin-top: 20px; text-align: center; }
-  .file-symbol { display: inline-flex; justify-content: center; align-items: center; width: 52px; height: 58px; border: 1px solid #bfcec5; border-radius: 7px 14px 7px 7px; background: #fff; margin-bottom: 16px; color: #356254; font-size: 12px; font-weight: 650; letter-spacing: .06em; box-shadow: 3px 3px 0 #e4ebe5; }
-  .file-area button { display: block; margin: 0 auto; min-width: 185px; }
-  .file-area .hint { margin-top: 10px; }
-  .source-file { font-size: 13px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
-  .processing { margin-top: 20px; }
-  .progress { list-style: none; padding: 0; margin: 0 0 15px; display: flex; gap: 8px; }
-  .progress li { flex: 1; min-width: 0; border-top: 3px solid #dbe4de; padding-top: 7px; color: #61736b; font-size: 12px; }
-  .progress li[data-current="true"] { color: var(--accent); border-color: var(--accent); font-weight: 650; }
-  .progress li[data-done="true"] { border-color: #8db6a1; }
-  .download { margin-top: 16px; padding: 16px; border: 1px solid #a5c9b5; border-radius: 9px; background: #f2f8f1; }
-  .download button { width: 100%; margin-bottom: 8px; }
-  .aside { background: #f0f4ef; padding: 30px 24px; border-left: 1px solid #d5dfd6; min-width: 0; }
-  .aside h2 { font-size: 15px; font-weight: 650; }
-  .steps { list-style: none; padding: 0; margin: 22px 0 0; }
-  .steps li { position: relative; padding: 0 0 25px 28px; }
-  .steps li::before { content: ''; position: absolute; top: 7px; left: 0; width: 9px; height: 9px; border: 2px solid #608a76; border-radius: 50%; background: #f0f4ef; z-index: 1; }
-  .steps li:not(:last-child)::after { content: ''; position: absolute; top: 16px; bottom: 0; left: 4px; border-left: 1px solid #b4c8b9; }
-  .steps strong { font-size: 14px; font-weight: 650; }
-  .steps p { font-size: 12px; margin-top: 5px; color: var(--muted); line-height: 1.8; }
-  .aside-note { padding-top: 17px; border-top: 1px solid #cbd9cd; font-size: 12px; color: #496153; }
-  .footer { margin-top: 22px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; font-size: 12px; color: #52645a; }
-  @media (max-width: 720px) { .page { padding: 20px 16px; } .intro { margin-top: 34px; } .workspace { grid-template-columns: 1fr; } .aside { border-left: 0; border-top: 1px solid #d5dfd6; padding: 24px; } .main { padding: 24px; } .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } .steps li { padding-bottom: 0; } .steps li::after { display: none; } }
-  @media (max-width: 420px) { .brand { font-size: 13px; gap: 7px; } .brand-mark { padding: 6px; } .local { font-size: 11px; padding-inline: 7px; } .main, .aside { padding: 20px; } .steps { grid-template-columns: 1fr; } .file-area { padding-inline: 12px; } }
+  .page { min-height: 100dvh; padding: 0 24px 24px; }
+  .shell { margin: 0 auto; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; min-height: 36px; margin-inline: -24px; padding: 6px 18px; background: var(--accent); color: #fff; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .brand-mark svg { width: 20px; height: 20px; }
+  .local { font-size: 12px; white-space: nowrap; }
+  .intro { margin: 30px auto 20px; max-width: 880px; }
+  .eyebrow { color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+  h1 { font-size: 23px; font-weight: 500; line-height: 1.4; text-wrap: balance; }
+  .intro > p:last-child { margin-top: 8px; color: var(--muted); }
+  .workspace { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(240px, 1fr); max-width: 880px; margin: 0 auto; border: 1px solid var(--line); background: var(--surface); }
+  .main { padding: 22px; min-width: 0; }
+  .section-title { font-size: 14px; line-height: 1.5; font-weight: 600; }
+  .step-index { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid var(--line); background: var(--soft); font-size: 12px; margin-right: 8px; color: var(--muted); }
+  .file-area { border: 1px solid var(--line); background: #fafafa; padding: 18px; margin-top: 16px; }
+  .file-symbol { display: none; }
+  .file-area button { min-height: 40px; }
+  .file-area .hint { margin-top: 8px; }
+  .source-file { font-size: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .processing { margin-top: 18px; }
+  .progress { list-style: none; padding: 0; margin: 0 0 12px; display: flex; gap: 0; }
+  .progress li { flex: 1; min-width: 0; border-bottom: 2px solid #ddd; padding: 0 4px 7px; color: var(--muted); font-size: 12px; }
+  .progress li[data-current="true"] { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+  .progress li[data-done="true"] { border-color: #7ca8dc; }
+  .download { margin-top: 12px; padding: 12px; border: 1px solid #9bbce1; background: #f3f8ff; }
+  .download button { width: 100%; min-height: 40px; margin-bottom: 6px; }
+  .aside { background: #fafafa; padding: 22px; border-left: 1px solid var(--line); min-width: 0; }
+  .aside h2 { font-size: 13px; font-weight: 600; }
+  .steps { padding-left: 19px; margin: 16px 0; }
+  .steps li { padding-left: 3px; margin-bottom: 16px; }
+  .steps li::marker { color: var(--muted); font-size: 12px; }
+  .steps strong { font-size: 13px; font-weight: 500; }
+  .steps p { font-size: 12px; margin-top: 4px; color: var(--muted); line-height: 1.65; }
+  .aside-note { padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .footer { max-width: 880px; margin: 14px auto 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; font-size: 12px; color: var(--muted); }
+  @media (max-width: 720px) { .workspace { grid-template-columns: 1fr; } .aside { border-left: 0; border-top: 1px solid var(--line); } .intro { margin-top: 22px; } }
+  @media (max-width: 420px) { .page { padding: 0 12px 18px; } .topbar { margin-inline: -12px; padding-inline: 12px; } .brand { gap: 6px; } .main, .aside { padding: 16px; } .file-area { padding: 14px; } h1 { font-size: 21px; } }
+  @media (pointer: coarse), (max-width: 480px) { button, .file-area button, .download button { min-height: 44px; } }
 `;
 
 const enhancerPhase: Record<EnhancerViewModel['phase'], string> = {
@@ -549,7 +568,7 @@ export function mountEnhancer(root: HTMLElement, actions: EnhancerActions): View
   fileInput.setAttribute('aria-label', '选择 LCEDA 导出的 HTML 文件');
   fileInput.dataset.testid = 'source-file-input';
   const choose = button('选择 HTML 文件', 'choose-file', true);
-  const hint = el('p', '选择 LCEDA 导出的 .html 或 .htm 文件', 'hint small muted');
+  const hint = el('p', '选择可信的 LCEDA 导出文件（.html / .htm）。生成的文件保留原查看器脚本。', 'hint small muted');
   const source = el('p', '尚未选择文件', 'source-file break');
   source.dataset.testid = 'source-filename';
   fileArea.append(symbol, choose, fileInput, hint, source);
@@ -581,7 +600,7 @@ export function mountEnhancer(root: HTMLElement, actions: EnhancerActions): View
   const steps = el('ol', undefined, 'steps');
   const instructions = [
     ['打开下载的文件', '用浏览器打开“*_扫码版.html”，原生查看器仍可照常使用。'],
-    ['手动开启扫码', '在右侧面板点击开启摄像头，或直接输入完整 C 编号。'],
+    ['手动开启扫码', '在右下角面板开启摄像头；也可使用原生搜索和 BOM 表格。'],
     ['核对位号后焊接', '按定位结果核对器件；焊接状态仍由你手动勾选。'],
   ];
   for (const [title, detail] of instructions) {
@@ -589,7 +608,7 @@ export function mountEnhancer(root: HTMLElement, actions: EnhancerActions): View
     step.append(el('strong', title), el('p', detail));
     steps.append(step);
   }
-  aside.append(steps, el('p', '摄像头不会自动开启。若浏览器限制本地文件的摄像头权限，可使用手动输入定位。', 'aside-note'));
+  aside.append(steps, el('p', '摄像头不会自动开启。若浏览器限制本地文件的摄像头权限，仍可使用原生搜索和 BOM 表格。', 'aside-note'));
   workspace.append(main, aside);
   const footer = el('footer', undefined, 'footer');
   footer.append(el('p', '原文件不改 · 另存为扫码版 · 无需安装 Node.js'), el('p', '仅供个人本地使用'));
